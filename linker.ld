@@ -1,10 +1,10 @@
 SECTIONS
 {
   . = 0x80000;
-  .text.boot : { KEEP(*(.text.boot)) }
+  .text.boot :  { KEEP(*(.text.boot)) }
   .text : { *(.text) }
 
-  .rodata : { *(.rodata) }
+  .rodata : { *(.rodata*) }
   .data : { *(.data) }
 
   /* record start/end of bss section to fill 0 */
