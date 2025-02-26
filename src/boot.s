@@ -10,8 +10,8 @@ non_primary_core:
   b non_primary_core
 
 clear_bss:
-  ldr x0, = bss_begin
-  ldr x1, = bss_end
+  ldr x0, = _bss_begin
+  ldr x1, = _bss_end
   mov x2, #0
 
 clear_bss_loop:
@@ -26,5 +26,3 @@ primary_core:
   bl main
 1:
   b 1b  
-
-
