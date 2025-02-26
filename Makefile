@@ -5,9 +5,9 @@ OBJCOPY = llvm-objcopy #
 AS = clang # Assembler
 
 # Build dir
-BUILD_DIR = build
-SRC_DIR = src
-
+BUILD_DIR = ./build
+SRC_DIR = ./src
+INCLUDE_DIR = ./include
 # 
 KERNEL_ELF = $(BUILD_DIR)/kernel.elf
 KERNEL_IMG = $(BUILD_DIR)/kernel.img
@@ -29,7 +29,7 @@ TOTAL := $(words $(STALE_OBJ))
 AARCH64 = /usr/aarch64-linux-gnu/
 
 # Compiler flags
-CFLAGS = -mcpu=cortex-a53 --target=aarch64-rpi3-elf --sysroot=$(AARCH64) -Wall -nostdlib -ffreestanding -mgeneral-regs-only -g 
+CFLAGS = -mcpu=cortex-a53 --target=aarch64-rpi3-elf --sysroot=$(AARCH64) -Wall -nostdlib -ffreestanding -mgeneral-regs-only -g -I$(INCLUDE_DIR)
 LDFLAGS = -m aarch64elf -T linker.ld --sysroot=$(AARCH64) 
 OBJFLAGS = --output-target=aarch64-rpi3-elf -O binary
 
