@@ -1,4 +1,7 @@
 #define PBASE 0x3f000000
+#define GPFSEL1 0x00200004
+#define GPPUD 0x00200094
+#define GPPUDCLK0 0x00200098
 
 void uart_init();
 
