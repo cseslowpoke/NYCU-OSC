@@ -1,3 +1,5 @@
+#ifndef __UART_H
+#define __UART_H
 #define GPFSEL1 ((volatile unsigned int *)0x3f200004)
 #define GPPUD ((volatile unsigned int *)0x3f200094)
 #define GPPUDCLK0 ((volatile unsigned int *)0x3f200098)
@@ -22,3 +24,4 @@ void uart_send(char c);
 char uart_recv();
 
 void uart_send_string(char *str);
+#endif // __UART_H
