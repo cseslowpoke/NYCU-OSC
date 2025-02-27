@@ -48,7 +48,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.s
 	@echo "[$(COUNT)/$(TOTAL)] Compiling $< ... "
 	@$(AS) $(CFLAGS) -c $< -o $@
 
-$(KERNEL_ELF): $(OBJ)
+$(KERNEL_ELF): $(OBJ) linker.ld
 	@echo "Linking kernel..."
 	@$(LD) $(LDFLAGS) -o $@ $(OBJ)
 	
