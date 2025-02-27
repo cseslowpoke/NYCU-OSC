@@ -1,6 +1,10 @@
 .section ".text.boot"
 .globl _start
 _start:
+  mrs x0, sctlr_el1
+  bic X0, X0, #0x1
+  msr sctlr_el1, x0
+  isb
   mrs x0, mpidr_el1
   and x0, x0, #0xFF
   cbz x0, clear_bss
