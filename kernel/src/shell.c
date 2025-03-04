@@ -137,5 +137,7 @@ void shell_process_command(char *buf, int buf_len) {
     command[iter].func();
     return;
   }
-  uart_send_string("Command not found\r\n");
+  uart_send_string("command not found: ");
+  uart_send_string(buf);
+  uart_send_string("\r\n");
 }
