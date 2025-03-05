@@ -24,4 +24,6 @@ void uart_send(char c);
 char uart_recv();
 
 void uart_send_string(char *str);
+
+void uart_recv_bytes(unsigned char *buf, unsigned int size);
 #endif // __UART_H

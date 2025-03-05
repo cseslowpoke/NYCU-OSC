@@ -43,3 +43,9 @@ void uart_send_string(char *str) {
     uart_send(*str++);
   }
 }
+
+void uart_recv_bytes(unsigned char *buf, unsigned int size) {
+  for (int i = 0; i < size; i++) {
+    buf[i] = uart_recv();
+  }
+}
