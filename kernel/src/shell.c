@@ -2,12 +2,13 @@
 #include "mailbox.h"
 #include "mbox_tags.h"
 #include "uart.h"
+#include "watchdog.h"
 
 static void cmd_help() {
   uart_send_string("help     : print this help menu\r\n"
                    "hello    : print Hello World!\r\n"
                    "mailbox  : print hardware's information\r\n"
-                   "reboot   : reboot the device (not implement)\r\n");
+                   "reboot   : reboot the device\r\n");
 }
 
 static void cmd_hello() { uart_send_string("Hello, world!\r\n"); }
@@ -87,8 +88,18 @@ static void cmd_mailbox() {
   uart_send_string("\r\n");
 }
 
-static command_t command[] = {
-    {"help", cmd_help}, {"hello", cmd_hello}, {"mailbox", cmd_mailbox}, {0, 0}};
+void cmd_reboot() {
+  uart_send_string("reboot\r\n");
+  reset(100);
+  while (1)
+    ;
+}
+
+static command_t command[] = {{"help", cmd_help},
+                              {"hello", cmd_hello},
+                              {"mailbox", cmd_mailbox},
+                              {"reboot", cmd_reboot},
+                              {0, 0}};
 
 void shell_start() {
   char s[] __attribute__((aligned(8))) = "Hello, world!\r\n";
