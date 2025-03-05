@@ -6,15 +6,15 @@ void uart_init() {
   *GPFSEL1 = 0x12000;
 
   // setting gpio Pull-up/down control register
-  *GPPUD = 0x1;
+  *GPPUD = 0;
   delay_cycles(150);
-  *GPPUDCLK0 = 1 << 15;
+  *GPPUDCLK0 = 0x11 << 14;
   delay_cycles(150);
   *GPPUD = 0;
   *GPPUDCLK0 = 0;
 
   // setting mini uart registers
-  *AUX_ENABLES = 0;
+  *AUX_ENABLES = 1;
   *AUX_MU_CNTL = 0;
   *AUX_MU_IER = 0;
   *AUX_MU_LCR = 3;
