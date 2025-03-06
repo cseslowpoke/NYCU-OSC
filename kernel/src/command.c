@@ -7,10 +7,13 @@
 #include "watchdog.h"
 
 void cmd_help(unsigned int argc, const char *argv[]) {
-  uart_send_string("help     : print this help menu\r\n"
-                   "hello    : print Hello World!\r\n"
-                   "mailbox  : print hardware's information\r\n"
-                   "reboot   : reboot the device\r\n");
+  uart_send_string("help      : print this help menu\r\n"
+                   "hello     : print Hello World!\r\n"
+                   "mailbox   : print hardware's information\r\n"
+                   "reboot    : reboot the device\r\n"
+                   "ls        : list files in the initramfs\r\n"
+                   "cat       : print the content of a file\r\n"
+                   "mem_alloc : allocate memory\r\n");
 }
 
 void cmd_hello(unsigned int argc, const char *argv[]) {
