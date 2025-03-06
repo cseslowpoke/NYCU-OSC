@@ -9,4 +9,6 @@ void uint2hex(unsigned int val, char *buf);
 
 unsigned int hex2uint(char *hex, int size);
 
+int atoi(const char *str);
+
 #endif // __UTILS_H

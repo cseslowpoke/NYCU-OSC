@@ -30,3 +30,15 @@ unsigned int hex2uint(char *hex, int size) {
   }
   return ret;
 }
+
+int atoi(const char *str) {
+  // negative number
+  if (*str == '-') {
+    return -atoi(str + 1);
+  }
+  int ret = 0;
+  for (int i = 0; str[i] != '\0'; i++) {
+    ret = ret * 10 + str[i] - '0';
+  }
+  return ret;
+}

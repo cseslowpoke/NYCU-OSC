@@ -1,6 +1,7 @@
 #include "file.h"
 #include "mailbox.h"
 #include "mbox_tags.h"
+#include "simple_alloc.h"
 #include "uart.h"
 #include "utils.h"
 #include "watchdog.h"
@@ -106,4 +107,26 @@ void cmd_cat(unsigned int argc, const char *argv[]) {
     return;
   }
   uart_send_string(tmp);
+}
+
+void cmd_mem_alloc(unsigned int argc, const char *argv[]) {
+  if (argc != 2) {
+    uart_send_string("Usage: mem_alloc <size>\r\n");
+    return;
+  }
+  int size = atoi(argv[1]);
+  if (size <= 0) {
+    uart_send_string("Invalid size\r\n");
+    return;
+  }
+  void *ptr = simple_alloc(size);
+  if (ptr == NULL) {
+    uart_send_string("Failed to allocate memory\r\n");
+    return;
+  }
+  uart_send_string("Allocated memory at: 0x");
+  char hexstr_buf[9] = {};
+  uint2hex((unsigned int)ptr, hexstr_buf);
+  uart_send_string(hexstr_buf);
+  uart_send_string("\r\n");
 }

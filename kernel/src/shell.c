@@ -10,6 +10,7 @@ static command_t command[] = {{"help", cmd_help},
                               {"reboot", cmd_reboot},
                               {"ls", cmd_ls},
                               {"cat", cmd_cat},
+                              {"mem_alloc", cmd_mem_alloc},
                               {0, 0}};
 
 void shell_start() {
