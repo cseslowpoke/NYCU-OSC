@@ -38,7 +38,7 @@ char uart_recv() {
   return (char)(*AUX_MU_IO);
 }
 
-void uart_send_string(char *str) {
+void uart_send_string(const char *str) {
   while (*str) {
     uart_send(*str++);
   }

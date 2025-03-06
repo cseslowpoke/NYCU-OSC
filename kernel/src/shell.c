@@ -1,7 +1,9 @@
 #include "shell.h"
+#include "file.h"
 #include "mailbox.h"
 #include "mbox_tags.h"
 #include "uart.h"
+#include "utils.h"
 #include "watchdog.h"
 
 static void cmd_help() {
@@ -55,35 +57,23 @@ arm_memory_t get_arm_memory() {
   return res;
 }
 
-void u32tohex(unsigned int val, char *buf) {
-  for (int i = 0; i < 8; i++) {
-    int nibble = (val >> (28 - i * 4)) & 0xF;
-    if (nibble < 10) {
-      buf[i] = '0' + nibble;
-    } else {
-      buf[i] = 'A' + nibble - 10;
-    }
-  }
-  buf[8] = '\0';
-}
-
 static void cmd_mailbox() {
   char hexstr_buf[9] = {};
   uart_send_string("Mailbox info:\r\n");
   // Board information
   unsigned int board_revision = get_board_revision();
   uart_send_string("Board revision: 0x");
-  u32tohex(board_revision, hexstr_buf);
+  uint2hex(board_revision, hexstr_buf);
   uart_send_string(hexstr_buf);
   uart_send_string("\r\n");
   // Arm memory information
   arm_memory_t arm_memory = get_arm_memory();
   uart_send_string("Arm memory base address: 0x");
-  u32tohex(arm_memory.base, hexstr_buf);
+  uint2hex(arm_memory.base, hexstr_buf);
   uart_send_string(hexstr_buf);
   uart_send_string("\r\n");
   uart_send_string("Arm memory size: 0x");
-  u32tohex(arm_memory.size, hexstr_buf);
+  uint2hex(arm_memory.size, hexstr_buf);
   uart_send_string(hexstr_buf);
   uart_send_string("\r\n");
 }
@@ -95,10 +85,24 @@ void cmd_reboot() {
     ;
 }
 
+void cmd_ls_append_ln(const char *filename) {
+  uart_send_string(filename);
+  uart_send_string("\r\n");
+}
+
+void cmd_ls() { file_list(cmd_ls_append_ln); }
+
+void cmd_cat() {
+  char *tmp = file_find((char *)"file1.txt");
+  uart_send_string(tmp);
+}
+
 static command_t command[] = {{"help", cmd_help},
                               {"hello", cmd_hello},
                               {"mailbox", cmd_mailbox},
                               {"reboot", cmd_reboot},
+                              {"ls", cmd_ls},
+                              {"cat", cmd_cat},
                               {0, 0}};
 
 void shell_start() {
