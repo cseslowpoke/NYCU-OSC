@@ -1,5 +1,5 @@
 #include "simple_alloc.h"
-#include "utils.h"
+#include "types.h"
 
 void *simple_alloc(unsigned int size) {
   if (heap_current + size >= heap_end) {

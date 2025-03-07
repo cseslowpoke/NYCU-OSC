@@ -2,6 +2,7 @@
 #include "mailbox.h"
 #include "mbox_tags.h"
 #include "simple_alloc.h"
+#include "types.h"
 #include "uart.h"
 #include "utils.h"
 #include "watchdog.h"

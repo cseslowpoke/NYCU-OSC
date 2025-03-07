@@ -1,8 +1,8 @@
 #include "shell.h"
 #include "command.h"
 #include "string.h"
+#include "types.h"
 #include "uart.h"
-#include "utils.h"
 
 static command_t command[] = {{"help", cmd_help},
                               {"hello", cmd_hello},
