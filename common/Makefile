@@ -27,6 +27,8 @@ STALE_OBJ := $(shell for obj in $(OBJ); do \
 
 TOTAL := $(words $(STALE_OBJ))
 
+COUNT = 0
+
 all: $(LIBRARY)
 	
 $(COMMON_BUILD)/%.o: $(SRC_DIR)/%.c

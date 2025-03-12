@@ -35,12 +35,14 @@ CFLAGS = -mcpu=cortex-a53 --target=aarch64-rpi3-elf --sysroot=$(AARCH64) -Wall -
 LDFLAGS = -m aarch64elf -T linker.ld --sysroot=$(AARCH64) 
 OBJFLAGS = --output-target=aarch64-rpi3-elf -O binary
 
+COUNT = 0
+
 all: $(KERNEL_IMG)
 
 # compile C files
 $(KERNEL_BUILD)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(KERNEL_BUILD)
-	@$(eval COUNT := $(shell expr $(COUNT) + 1))
+	$(eval COUNT := $(shell expr $(COUNT) + 1))
 	@echo "[$(COUNT)/$(TOTAL)] Compiling $< ... "
 	@$(CC) $(CFLAGS) -c $< -o $@
 

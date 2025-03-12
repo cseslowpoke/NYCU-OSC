@@ -30,6 +30,8 @@ CFLAGS = -mcpu=cortex-a53 --target=aarch64-rpi3-elf --sysroot=$(AARCH64) -Wall -
 LDFLAGS = -m aarch64elf -T linker.ld --sysroot=$(AARCH64) 
 OBJFLAGS = --output-target=aarch64-rpi3-elf -O binary
 
+COUNT = 0
+
 all: $(KERNEL_IMG)
 
 # compile C files
