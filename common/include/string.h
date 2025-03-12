@@ -9,4 +9,6 @@ void strip(char **str, const char delim);
 
 unsigned int strlen(const char *s);
 
+char *strcpy(char *dest, const char *src);
+
 #endif
