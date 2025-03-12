@@ -6,6 +6,7 @@ AS = clang # Assembler
 
 # Build dir
 BUILD_DIR = ../build
+KERNEL_BUILD = $(BUILD_DIR)/kernel
 SRC_DIR = ./src
 
 KERNEL_ELF = $(BUILD_DIR)/kernel.elf
@@ -13,8 +14,8 @@ KERNEL_IMG = $(BUILD_DIR)/kernel.img
 LIBCOMMON = $(BUILD_DIR)/libcommon.a
 
 SRC = $(wildcard $(SRC_DIR)/*.c) $(wildcard $(SRC_DIR)/*.s)
-OBJ = $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(wildcard $(SRC_DIR)/*.c))
-OBJ += $(patsubst $(SRC_DIR)/%.s, $(BUILD_DIR)/%.o, $(wildcard $(SRC_DIR)/*.s))
+OBJ = $(patsubst $(SRC_DIR)/%.c, $(KERNEL_BUILD)/%.o, $(wildcard $(SRC_DIR)/*.c))
+OBJ += $(patsubst $(SRC_DIR)/%.s, $(KERNEL_BUILD)/%.o, $(wildcard $(SRC_DIR)/*.s))
 
 STALE_OBJ := $(shell for obj in $(OBJ); do \
                  src="$$(echo $$obj | sed 's|build/|src/|' | sed 's|.o$$||')"; \
@@ -37,14 +38,14 @@ OBJFLAGS = --output-target=aarch64-rpi3-elf -O binary
 all: $(KERNEL_IMG)
 
 # compile C files
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
-	@mkdir -p $(BUILD_DIR)
+$(KERNEL_BUILD)/%.o: $(SRC_DIR)/%.c
+	@mkdir -p $(KERNEL_BUILD)
 	@$(eval COUNT := $(shell expr $(COUNT) + 1))
 	@echo "[$(COUNT)/$(TOTAL)] Compiling $< ... "
 	@$(CC) $(CFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.s
-	@mkdir -p $(BUILD_DIR)
+$(KERNEL_BUILD)/%.o: $(SRC_DIR)/%.s
+	@mkdir -p $(KERNEL_BUILD)
 	@$(eval COUNT := $(shell expr $(COUNT) + 1))
 	@echo "[$(COUNT)/$(TOTAL)] Compiling $< ... "
 	@$(AS) $(CFLAGS) -c $< -o $@
