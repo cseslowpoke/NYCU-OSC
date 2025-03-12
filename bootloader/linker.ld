@@ -14,9 +14,10 @@ SECTIONS
 
   .data : { *(.data) }
 
+  . = ALIGN(8);
   _bootloader_size = . - _boot_begin;
   /* record start/end of bss section to fill 0 */
-  . = 0x40000 + (. - _boot_begin);
+  . = 0x40000 + _bootloader_size;
   . = ALIGN(8);
   _bss_begin = .; 
   .bss (NOLOAD): { *(.bss) }
