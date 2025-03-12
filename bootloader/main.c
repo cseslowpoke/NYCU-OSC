@@ -1,13 +1,11 @@
-
 #include "uart.h"
 #include "utils.h"
 
 #define KERNEL_BASE_ADDRESS ((volatile unsigned char *)(0x80000))
 #define KERNEL_MAGIC 0x544F4F42
 
-int main() {
+int main(void *dtb_addr) {
   uart_init();
-
   while (1) {
     uart_send_string("UART bootloader: Waiting for kernel...\r\n");
     unsigned int boot, length, checksum;
@@ -25,8 +23,9 @@ int main() {
         continue;
       } else {
       }
-      __asm__ volatile("ldr x0, =0x80000");
-      __asm__ volatile("br x0");
+      __asm__ volatile("mov x0, %0" : : "r"(dtb_addr) : "x0");
+      __asm__ volatile("ldr x1, =0x80000");
+      __asm__ volatile("br x1");
     }
   }
   return 0;

@@ -1,6 +1,7 @@
 .section ".text.relo"
 .globl _start
 _start:
+  mov x4, x0
   ldr x0, =_boot_begin
   ldr x1, =0x40000
   ldr x2, =_bootloader_size
@@ -14,7 +15,6 @@ relocation_loop:
 go_new:
   ldr x0, =0x40000
   br x0
-
 
 .section ".text.boot"
 .globl _start_boot
@@ -42,6 +42,7 @@ clear_bss_loop:
 primary_core:
   ldr x0, = _stack_top
   mov sp, x0
+  mov x0, x4
   bl main
 1:
   b 1b
