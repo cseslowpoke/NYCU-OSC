@@ -5,7 +5,7 @@ extern char _heap_start;
 
 static volatile char *heap_start;
 static volatile char *heap_end;
-static char *heap_current;
+static volatile char *heap_current;
 
 void *simple_alloc(unsigned int size);
 

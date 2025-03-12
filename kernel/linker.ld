@@ -18,5 +18,5 @@ SECTIONS
   .bss (NOLOAD): { *(.bss) }
   _bss_end = .;
   _stack_top = 0x80000 + 0x8000; /* 32 KB stack */
-  _heap_start = 0x90000;
+  _heap_start = 0x10000000;
 }
