@@ -111,6 +111,7 @@ void cmd_cat(unsigned int argc, const char *argv[]) {
     return;
   }
   uart_send_string(tmp);
+  uart_send_string("\r\n");
 }
 
 void cmd_mem_alloc(unsigned int argc, const char *argv[]) {
