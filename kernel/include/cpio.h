@@ -1,8 +1,6 @@
 #ifndef __CPIO_H
 #define __CPIO_H
 
-#define CPIO_BASE_ADDR (0x8000000)
-
 typedef struct {
   char c_magic[6];
   char c_ino[8];

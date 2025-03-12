@@ -1,6 +1,7 @@
 .section ".text.boot"
 .globl _start
 _start:
+  mov x4, x0
   mrs x0, sctlr_el1
   bic X0, X0, #0x1
   msr sctlr_el1, x0
@@ -27,6 +28,7 @@ clear_bss_loop:
 primary_core:
   ldr x0, = _stack_top
   mov sp, x0
+  mov x0, x4
   bl main
 1:
   b 1b  

@@ -1,10 +1,7 @@
 all:
-	@echo "===== Compiling common ====="
-	@$(MAKE) -C common --no-print-directory -s
-	@echo "===== Compiling bootloader ====="
-	@$(MAKE) -C bootloader --no-print-directory -s
-	@echo "===== Compiling kernel ====="
-	@$(MAKE) -C kernel --no-print-directory -s
+	@make -C common -s -q || (echo "===== Compiling common =====" && make -C common --no-print-directory -s)
+	@make -C bootloader -s -q || (echo "===== Compiling bootloader =====" && make -C bootloader --no-print-directory -s)
+	@make -C kernel -s -q || (echo "===== Compiling kernel =====" && make -C kernel --no-print-directory -s)
 
 clean:
 	@$(MAKE) -C common clean --no-print-directory
@@ -12,14 +9,14 @@ clean:
 	@$(MAKE) -C kernel clean --no-print-directory
 
 bootloader: all
-	@qemu-system-aarch64 -M raspi3b -kernel build/bootloader.img -display none -serial null -serial stdio
+	@qemu-system-aarch64 -M raspi3b -kernel build/bootloader.img -display none -serial null -serial stdio -initrd initramfs.cpio -dtb bcm2710-rpi-3-b-plus.dtb
 
 bootloader_gdb: all
-	@qemu-system-aarch64 -M raspi3b -kernel build/bootloader.img -display none -serial null -serial stdio -S -s
+	@qemu-system-aarch64 -M raspi3b -kernel build/bootloader.img -display none -serial null -serial stdio -S -s -initrd initramfs.cpio -dtb bcm2710-rpi-3-b-plus.dtb
 
 run: all
-	@qemu-system-aarch64 -M raspi3b -kernel build/kernel.img -display none -serial null -serial stdio -initrd initramfs.cpio
+	@qemu-system-aarch64 -M raspi3b -kernel build/kernel.img -display none -serial null -serial stdio -initrd initramfs.cpio -dtb bcm2710-rpi-3-b-plus.dtb
 run_gdb: all
-	@qemu-system-aarch64 -M raspi3b -kernel build/kernel.img -display none -serial null -serial stdio -initrd initramfs.cpio -S -s
+	@qemu-system-aarch64 -M raspi3b -kernel build/kernel.img -display none -serial null -serial stdio -initrd initramfs.cpio -dtb bcm2710-rpi-3-b-plus.dtb -S -s
 	
 .PHONY: all clean bootloader bootloader_gdb run run_gdb

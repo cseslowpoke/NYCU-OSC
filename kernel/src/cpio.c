@@ -1,11 +1,23 @@
 #include "cpio.h"
+#include "fdt.h"
 #include "file.h"
 #include "string.h"
+#include "types.h"
+#include "uart.h"
 #include "utils.h"
 
 void cpio_init() {
-  volatile cpio_newc_header *header =
-      (volatile cpio_newc_header *)CPIO_BASE_ADDR;
+  char *name_list[2];
+  name_list[0] = "chosen";
+  name_list[1] = NULL;
+  dtb_node_t *chosen_node = dtb_find_node(name_list);
+  if (chosen_node == NULL) {
+    uart_send_string("Cannot find chosen node in dtb\n");
+    return;
+  }
+  uint32_t *base_addr = (uint32_t *)(uint64_t)device_ptr(
+      *(uint32_t *)dtb_find_property(chosen_node, "linux,initrd-start"));
+  volatile cpio_newc_header *header = (volatile cpio_newc_header *)base_addr;
   while (1) {
     if (header->c_magic[0] != '0' || header->c_magic[1] != '7' ||
         header->c_magic[2] != '0' || header->c_magic[3] != '7' ||
