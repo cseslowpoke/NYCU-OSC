@@ -14,13 +14,14 @@ void file_register(char *filename, char *content, int size) {
   file_entry_count++;
 }
 
-char *file_find(const char *filename) {
+int file_find(const char *filename, char **buf) {
   for (int i = 0; i < file_entry_count; i++) {
     if (strcmp(file_table[i].name, filename) == 0) {
-      return file_table[i].content;
+      *buf = file_table[i].content;
+      return file_table[i].size;
     }
   }
-  return 0;
+  return -1;
 }
 
 void file_list(void (*callback)(const char *)) {

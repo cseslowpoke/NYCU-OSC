@@ -14,7 +14,7 @@ extern unsigned int file_entry_count;
 
 void file_register(char *filename, char *content, int size);
 
-char *file_find(const char *filename);
+int file_find(const char *filename, char **buf);
 
 void file_list(void (*callback)(const char *));
 

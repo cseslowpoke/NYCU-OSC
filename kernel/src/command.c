@@ -105,12 +105,18 @@ void cmd_cat(unsigned int argc, const char *argv[]) {
     uart_send_string("Usage: cat <filename>\r\n");
     return;
   }
-  char *tmp = file_find(argv[1]);
-  if (tmp == NULL) {
+  char *buf;
+  int size = file_find(argv[1], &buf);
+  if (size == -1) {
     uart_send_string("File not found: \r\n");
     return;
   }
-  uart_send_string(tmp);
+  while (size--) {
+    if (*buf == '\n') {
+      uart_send('\r');
+    }
+    uart_send(*buf++);
+  }
   uart_send_string("\r\n");
 }
 
