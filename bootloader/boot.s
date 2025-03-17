@@ -20,6 +20,13 @@ go_new:
 .globl _start_boot
 
 _start_boot:
+  mrs x0, CurrentEL
+  lsr x0, x0, #2
+  cmp x0, #2
+  bne 1f
+  bl from_el2_to_el1
+
+1:
   mrs x0, mpidr_el1
   and x0, x0, #0xFF
   cbz x0, clear_bss
@@ -46,3 +53,11 @@ primary_core:
   bl main
 1:
   b 1b
+
+from_el2_to_el1:
+  mov x0, (1 << 31) // EL1 uses aarch64
+  msr hcr_el2, x0
+  mov x0, 0x3c5 // EL1h (SPSel = 1) with interrupt disabled
+  msr spsr_el2, x0
+  msr elr_el2, lr
+  eret // return to EL1
