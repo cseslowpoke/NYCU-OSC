@@ -1,23 +1,26 @@
-# toolchain
-CC = clang # C compiler
-LD = ld.lld # Linker
-OBJCOPY = llvm-objcopy # 
-AS = clang # Assembler
+BUILD_ROOT := ../build
+BUILD_KERNEL := $(BUILD_ROOT)/kernel
 
-# Build dir
-BUILD_DIR = ../build
-KERNEL_BUILD = $(BUILD_DIR)/kernel
-SRC_DIR = ./src
+CC := clang
+LD := ld.lld
+OBJCOPY := llvm-objcopy
+AS := clang
 
-KERNEL_ELF = $(BUILD_DIR)/kernel.elf
-KERNEL_IMG = $(BUILD_DIR)/kernel.img
-LIBCOMMON = $(BUILD_DIR)/libcommon.a
+CFLAGS := -mcpu=cortex-a53 --target=aarch64-rpi3-elf --sysroot=$(AARCH64) -Wall -nostdlib -ffreestanding -mgeneral-regs-only -g -Iinclude
+LDFLAGS := -T linker.ld
+OBJFLAGS = --output-target=aarch64-rpi3-elf -O binary
 
-SRC = $(wildcard $(SRC_DIR)/*.c) $(wildcard $(SRC_DIR)/*.s)
-OBJ = $(patsubst $(SRC_DIR)/%.c, $(KERNEL_BUILD)/%.o, $(wildcard $(SRC_DIR)/*.c))
-OBJ += $(patsubst $(SRC_DIR)/%.s, $(KERNEL_BUILD)/%.o, $(wildcard $(SRC_DIR)/*.s))
+include arch/arm64/Makefile
+include common/Makefile
+include core/Makefile
+include drivers/Makefile
+include fs/Makefile
 
-STALE_OBJ := $(shell for obj in $(OBJ); do \
+SRC := $(SRC_ARCH) $(SRC_COMMON) $(SRC_CORE) $(SRC_DRIVERS) $(SRC_FS) main.c
+OBJS := $(patsubst %.c, $(BUILD_KERNEL)/%.o, $(filter %.c, $(SRC))) \
+        $(patsubst %.s, $(BUILD_KERNEL)/%.o, $(filter %.s, $(SRC)))
+
+STALE_OBJ := $(shell for obj in $(OBJS); do \
                  src="$$(echo $$obj | sed 's|build/|src/|' | sed 's|.o$$||')"; \
                  if [ ! -f $$obj ] || [ -f $$src.c -a $$src.c -nt $$obj ] || [ -f $$src.s -a $$src.s -nt $$obj ]; then \
                    echo $$obj; \
@@ -25,45 +28,29 @@ STALE_OBJ := $(shell for obj in $(OBJ); do \
                done)
 
 TOTAL := $(words $(STALE_OBJ))
-
-# Host library
-AARCH64 = /usr/aarch64-linux-gnu/
-
-# Compiler flags
-CFLAGS = -mcpu=cortex-a53 --target=aarch64-rpi3-elf --sysroot=$(AARCH64) -Wall -nostdlib -ffreestanding -mgeneral-regs-only -g \
-				 -I include -I ../common/include
-LDFLAGS = -m aarch64elf -T linker.ld --sysroot=$(AARCH64) 
-OBJFLAGS = --output-target=aarch64-rpi3-elf -O binary
-
 COUNT = 0
 
-all: $(KERNEL_IMG)
+all: $(BUILD_ROOT)/kernel.img
 
-# compile C files
-$(KERNEL_BUILD)/%.o: $(SRC_DIR)/%.c
-	@mkdir -p $(KERNEL_BUILD)
-	$(eval COUNT := $(shell expr $(COUNT) + 1))
+$(BUILD_KERNEL)/%.o: %.c
+	@mkdir -p $(dir $@)
+	@$(eval COUNT := $(shell expr $(COUNT) + 1))
 	@echo "[$(COUNT)/$(TOTAL)] Compiling $< ... "
 	@$(CC) $(CFLAGS) -c $< -o $@
 
-$(KERNEL_BUILD)/%.o: $(SRC_DIR)/%.s
-	@mkdir -p $(KERNEL_BUILD)
+$(BUILD_KERNEL)/%.o: %.s
+	@mkdir -p $(dir $@)
 	@$(eval COUNT := $(shell expr $(COUNT) + 1))
 	@echo "[$(COUNT)/$(TOTAL)] Compiling $< ... "
 	@$(AS) $(CFLAGS) -c $< -o $@
 
-$(LIBCOMMON):
-	@$(MAKE) -C ../common/
-
-$(KERNEL_ELF): $(OBJ) $(LIBCOMMON) linker.ld
+$(BUILD_ROOT)/kernel.elf: $(OBJS) linker.ld
 	@echo "Linking kernel..."
-	@$(LD) $(LDFLAGS) -o $@ $(OBJ) $(LIBCOMMON)
+	@$(LD) $(LDFLAGS) $(OBJS) -o $@
 
-$(KERNEL_IMG): $(KERNEL_ELF)
+$(BUILD_ROOT)/kernel.img: $(BUILD_ROOT)/kernel.elf
 	@echo "Build kernel Image..."
 	@$(OBJCOPY) $(OBJFLAGS) $< $@
 
 clean:
-	rm -rf $(BUILD_DIR)
-
-.PHONY: all clean
+	rm -rf $(BUILD_ROOT)

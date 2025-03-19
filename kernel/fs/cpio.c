@@ -1,10 +1,10 @@
-#include "cpio.h"
-#include "fdt.h"
-#include "file.h"
-#include "string.h"
-#include "types.h"
-#include "uart.h"
-#include "utils.h"
+#include "fs/cpio.h"
+#include "fs/fdt.h"
+#include "fs/file.h"
+#include "common/string.h"
+#include "common/types.h"
+#include "drivers/uart.h"
+#include "common/utils.h"
 
 void cpio_init() {
   char *name_list[2];

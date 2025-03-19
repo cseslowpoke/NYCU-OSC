@@ -1,4 +1,4 @@
-#include "watchdog.h"
+#include "drivers/watchdog.h"
 
 void set(long addr, unsigned int value) {
   volatile unsigned int *point = (unsigned int *)addr;

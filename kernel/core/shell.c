@@ -1,8 +1,8 @@
-#include "shell.h"
-#include "command.h"
-#include "string.h"
-#include "types.h"
-#include "uart.h"
+#include "core/shell.h"
+#include "core/command.h"
+#include "common/string.h"
+#include "common/types.h"
+#include "drivers/uart.h"
 
 static command_t command[] = {{"help", cmd_help},
                               {"hello", cmd_hello},
@@ -11,6 +11,7 @@ static command_t command[] = {{"help", cmd_help},
                               {"ls", cmd_ls},
                               {"cat", cmd_cat},
                               {"mem_alloc", cmd_mem_alloc},
+                              {"exec", cmd_exec},
                               {0, 0}};
 
 void shell_start() {

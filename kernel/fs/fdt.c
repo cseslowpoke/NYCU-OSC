@@ -1,10 +1,9 @@
-#include "fdt.h"
-#include "simple_alloc.h"
-#include "string.h"
-#include "types.h"
-#include "uart.h"
-#include "utils.h"
-#include <string.h>
+#include "fs/fdt.h"
+#include "core/simple_alloc.h"
+#include "common/string.h"
+#include "common/types.h"
+#include "drivers/uart.h"
+#include "common/utils.h"
 
 static fdt_header *header;
 static char *dt_strings;

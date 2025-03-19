@@ -1,5 +1,4 @@
 #include "uart.h"
-#include "utils.h"
 
 void uart_init() {
   // setting gpio 14 and 15 to alternative function 5 (mini uart)
@@ -7,9 +6,9 @@ void uart_init() {
 
   // setting gpio Pull-up/down control register
   *GPPUD = 0;
-  delay_cycles(150);
+  DELAY_CYCLES(150);
   *GPPUDCLK0 = 0x11 << 14;
-  delay_cycles(150);
+  DELAY_CYCLES(150);
   *GPPUD = 0;
   *GPPUDCLK0 = 0;
 

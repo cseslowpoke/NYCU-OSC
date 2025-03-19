@@ -17,6 +17,13 @@
 #define UART_CAN_READ() ((*AUX_MU_LSR) & 0x01)
 #define UART_CAN_WRITE() ((*AUX_MU_LSR) & 0x20)
 
+#define DELAY_CYCLES(cycles) do {              \
+    int _c = (cycles);                           \
+    while (_c-- > 0) {                           \
+      __asm__ volatile("nop");                   \
+    }                                            \
+  } while (0)
+  
 void uart_init();
 
 void uart_send(char c);
@@ -26,4 +33,6 @@ char uart_recv();
 void uart_send_string(const char *str);
 
 void uart_recv_bytes(unsigned char *buf, unsigned int size);
+
+
 #endif // __UART_H

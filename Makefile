@@ -1,10 +1,8 @@
 all:
-	@make -C common -s -q || (echo "===== Compiling common =====" && make -C common --no-print-directory -s)
 	@make -C bootloader -s -q || (echo "===== Compiling bootloader =====" && make -C bootloader --no-print-directory -s)
 	@make -C kernel -s -q || (echo "===== Compiling kernel =====" && make -C kernel --no-print-directory -s)
 
 clean:
-	@$(MAKE) -C common clean --no-print-directory
 	@$(MAKE) -C bootloader clean --no-print-directory
 	@$(MAKE) -C kernel clean --no-print-directory
 
@@ -16,6 +14,7 @@ bootloader_gdb: all
 
 run: all
 	@qemu-system-aarch64 -M raspi3b -kernel build/kernel.img -display none -serial null -serial stdio -initrd initramfs.cpio -dtb bcm2710-rpi-3-b-plus.dtb
+
 run_gdb: all
 	@qemu-system-aarch64 -M raspi3b -kernel build/kernel.img -display none -serial null -serial stdio -initrd initramfs.cpio -dtb bcm2710-rpi-3-b-plus.dtb -S -s
 	

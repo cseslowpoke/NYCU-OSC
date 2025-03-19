@@ -1,10 +1,4 @@
-#include "utils.h"
-
-void delay_cycles(int cycles) {
-  while (cycles-- > 0) {
-    __asm__ volatile("nop");
-  }
-}
+#include "common/utils.h"
 
 void uint2hex(unsigned int val, char *buf) {
   for (int i = 0; i < 8; i++) {

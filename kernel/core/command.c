@@ -1,11 +1,12 @@
-#include "file.h"
-#include "mailbox.h"
-#include "mbox_tags.h"
-#include "simple_alloc.h"
-#include "types.h"
-#include "uart.h"
-#include "utils.h"
-#include "watchdog.h"
+#include "fs/file.h"
+#include "drivers/mailbox.h"
+#include "drivers/mbox_tags.h"
+#include "core/simple_alloc.h"
+#include "common/types.h"
+#include "drivers/uart.h"
+#include "core/user_exec.h"
+#include "common/utils.h"
+#include "drivers/watchdog.h"
 
 void cmd_help(unsigned int argc, const char *argv[]) {
   uart_send_string("help      : print this help menu\r\n"
@@ -140,4 +141,18 @@ void cmd_mem_alloc(unsigned int argc, const char *argv[]) {
   uint2hex((unsigned int)ptr, hexstr_buf);
   uart_send_string(hexstr_buf);
   uart_send_string("\r\n");
+}
+
+void cmd_exec(unsigned int argc, const char *argv[]) {
+  if (argc != 2) {
+    uart_send_string("Usage: user_exec <filename>\r\n");
+    return;
+  }
+  char *buf;
+  int size = file_find(argv[1], &buf);
+  if (size == -1) {
+    uart_send_string("File not found: \r\n");
+    return;
+  }
+  user_exec(buf, size);
 }

@@ -1,7 +1,7 @@
 #ifndef __UTILS_H
 #define __UTILS_H
 
-#include "types.h"
+#include "common/types.h"
 
 void delay_cycles(int cycles);
 

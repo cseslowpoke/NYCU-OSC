@@ -1,5 +1,4 @@
 #include "uart.h"
-#include "utils.h"
 
 #define KERNEL_BASE_ADDRESS ((volatile unsigned char *)(0x80000))
 #define KERNEL_MAGIC 0x544F4F42

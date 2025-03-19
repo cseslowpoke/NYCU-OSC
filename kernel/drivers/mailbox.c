@@ -1,4 +1,4 @@
-#include "mailbox.h"
+#include "drivers/mailbox.h"
 
 unsigned int mailbox[36] __attribute__((aligned(16)));
 

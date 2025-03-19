@@ -3,16 +3,14 @@ LD = ld.lld
 OBJCOPY = llvm-objcopy
 AS = clang
 
-
 BUILD_DIR = ../build
 BOOTLOADER_BUILD = ../build/bootloader
 
 KERNEL_ELF = $(BUILD_DIR)/bootloader.elf
 KERNEL_IMG = $(BUILD_DIR)/bootloader.img
-LIBCOMMON = $(BUILD_DIR)/libcommon.a
 
-SRC = boot.s main.c
-OBJ = $(BOOTLOADER_BUILD)/boot.o $(BOOTLOADER_BUILD)/main.o
+SRC = boot.s main.c uart.c 
+OBJ = $(BOOTLOADER_BUILD)/boot.o $(BOOTLOADER_BUILD)/main.o $(BOOTLOADER_BUILD)/uart.o
 
 STALE_OBJ := $(shell for obj in $(OBJ); do \
                  src="$$(echo $$obj | sed 's|build/|src/|' | sed 's|.o$$||')"; \
@@ -25,8 +23,7 @@ TOTAL := $(words $(STALE_OBJ))
 
 
 AARCH64 = /usr/aarch64-linux-gnu/
-CFLAGS = -mcpu=cortex-a53 --target=aarch64-rpi3-elf --sysroot=$(AARCH64) -Wall -nostdlib -ffreestanding -mgeneral-regs-only -g \
-				 -I ../common/include
+CFLAGS = -mcpu=cortex-a53 --target=aarch64-rpi3-elf --sysroot=$(AARCH64) -Wall -nostdlib -ffreestanding -mgeneral-regs-only -g 
 LDFLAGS = -m aarch64elf -T linker.ld --sysroot=$(AARCH64) 
 OBJFLAGS = --output-target=aarch64-rpi3-elf -O binary
 
@@ -48,9 +45,6 @@ $(BOOTLOADER_BUILD)/%.o: %.s
 	@$(eval COUNT := $(shell expr $(COUNT) + 1))
 	@echo "[$(COUNT)/$(TOTAL)] Compiling $< ... "
 	@$(AS) $(CFLAGS) -c $< -o $@
-
-$(LIBCOMMON):
-	@$(MAKE) -C ../common/
 
 $(KERNEL_ELF): $(OBJ) $(LIBCOMMON) linker.ld
 	@echo "Linking kernel..."

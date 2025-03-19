@@ -1,5 +1,5 @@
-#include "file.h"
-#include "string.h"
+#include "fs/file.h"
+#include "common/string.h"
 
 file_entry file_table[MAX_FILE_NUM];
 unsigned int file_entry_count;

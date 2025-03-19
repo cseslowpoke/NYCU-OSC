@@ -1,7 +1,7 @@
 #ifndef __FDT_H
 #define __FDT_H
 
-#include "types.h"
+#include "common/types.h"
 
 #define FDT_BEGIN_NODE (0x00000001)
 #define FDT_END_NODE (0x00000002)

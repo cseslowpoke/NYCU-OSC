@@ -1,5 +1,5 @@
-#include "string.h"
-#include "types.h"
+#include "common/string.h"
+#include "common/types.h"
 
 int strcmp(const char *s1, const char *s2) {
   while (*s1 && *s2 && *s1 == *s2) {

@@ -20,4 +20,6 @@ void cmd_cat(unsigned int argc, const char *argv[]);
 
 void cmd_mem_alloc(unsigned int argc, const char *argv[]);
 
+void cmd_exec(unsigned int argc, const char *argv[]);
+
 #endif
