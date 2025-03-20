@@ -9,10 +9,10 @@ _start:
   bl from_el2_to_el1
 
 1:
-  mrs x0, sctlr_el1
-  bic X0, X0, #0x1
-  msr sctlr_el1, x0
-  isb
+  // mrs x0, sctlr_el1
+  // bic X0, X0, #0x1
+  // msr sctlr_el1, x0
+  // isb
   mrs x0, mpidr_el1
   and x0, x0, #0xFF
   cbz x0, clear_bss
@@ -33,6 +33,7 @@ clear_bss_loop:
   b clear_bss_loop
 
 primary_core:
+  bl set_exception_vector_table
   ldr x0, = _stack_top
   mov sp, x0
   mov x0, x4

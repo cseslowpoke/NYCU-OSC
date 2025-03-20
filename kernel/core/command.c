@@ -1,12 +1,12 @@
-#include "fs/file.h"
+#include "common/types.h"
+#include "common/utils.h"
+#include "core/simple_alloc.h"
+#include "core/user_exec.h"
 #include "drivers/mailbox.h"
 #include "drivers/mbox_tags.h"
-#include "core/simple_alloc.h"
-#include "common/types.h"
 #include "drivers/uart.h"
-#include "core/user_exec.h"
-#include "common/utils.h"
 #include "drivers/watchdog.h"
+#include "fs/file.h"
 
 void cmd_help(unsigned int argc, const char *argv[]) {
   uart_send_string("help      : print this help menu\r\n"
@@ -138,7 +138,7 @@ void cmd_mem_alloc(unsigned int argc, const char *argv[]) {
   }
   uart_send_string("Allocated memory at: 0x");
   char hexstr_buf[9] = {};
-  uint2hex((unsigned int)ptr, hexstr_buf);
+  uint2hex((uint64_t)ptr, hexstr_buf);
   uart_send_string(hexstr_buf);
   uart_send_string("\r\n");
 }

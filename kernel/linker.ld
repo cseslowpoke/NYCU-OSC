@@ -2,6 +2,7 @@ SECTIONS
 {
   . = 0x80000;
   .text.boot : { KEEP(*(.text.boot)) }
+  .text.exception : {KEEP(*(.text.exception))}
   .text : { *(.text) }
 
   .rodata : ALIGN(8) {

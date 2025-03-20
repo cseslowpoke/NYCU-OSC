@@ -11,4 +11,11 @@ uint32_t hex2uint(char *hex, int size);
 
 int atoi(const char *str);
 
+#define READ_SYSREG(sysreg)                                                    \
+  ({                                                                           \
+    uint64_t val;                                                              \
+    asm volatile("mrs %0, " #sysreg : "=r"(val));                              \
+    val;                                                                       \
+  })
+
 #endif // __UTILS_H
