@@ -2,6 +2,7 @@
 #define __EXCEPTION_H
 
 #include "common/types.h"
+#include "common/utils.h"
 
 void default_exception_handler();
 
@@ -20,5 +21,9 @@ void _el1_current_el_aarch64_irq_handler();
 void _el1_current_el_aarch64_fiq_handler();
 
 void _el1_current_el_aarch64_serror_handler();
+
+#define DISABLE_EXCEPTION() WRITE_SYSREG(DAIFClr, 0xfl)
+
+#define ENABLE_EXCEPTION() WRITE_SYSREG(DAIFSet, 0xfl)
 
 #endif
