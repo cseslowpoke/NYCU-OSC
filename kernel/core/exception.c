@@ -1,6 +1,7 @@
 #include "core/exception.h"
 #include "common/types.h"
 #include "common/utils.h"
+#include "drivers/irq.h"
 #include "drivers/timer.h"
 #include "drivers/uart.h"
 
@@ -48,7 +49,7 @@ void _el1_lower_el_aarch64_serror_handler() {}
 
 void _el1_current_el_aarch64_sync_handler() {}
 
-void _el1_current_el_aarch64_irq_handler() { timer_irq_handler(); }
+void _el1_current_el_aarch64_irq_handler() { irq_handler_entry(); }
 
 void _el1_current_el_aarch64_fiq_handler() {}
 

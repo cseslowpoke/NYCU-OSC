@@ -19,6 +19,6 @@ int atoi(const char *str);
   })
 
 #define WRITE_SYSREG(sysreg, val)                                              \
-  ({ asm volatile("msr " #sysreg ", %0" : : "r"(val)); })
+  asm volatile("msr " #sysreg ", %0" : : "r"(val));
 
 #endif // __UTILS_H

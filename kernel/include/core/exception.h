@@ -22,8 +22,8 @@ void _el1_current_el_aarch64_fiq_handler();
 
 void _el1_current_el_aarch64_serror_handler();
 
-#define DISABLE_EXCEPTION() WRITE_SYSREG(DAIFClr, 0xfl)
+#define DISABLE_EXCEPTION() asm volatile("msr DAIFClr, #0xf" ::: "memory")
 
-#define ENABLE_EXCEPTION() WRITE_SYSREG(DAIFSet, 0xfl)
+#define ENABLE_EXCEPTION() asm volatile("msr DAIFSet, #0xf" ::: "memory")
 
 #endif
