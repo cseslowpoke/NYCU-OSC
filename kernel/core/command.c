@@ -1,9 +1,11 @@
+#include "common/string.h"
 #include "common/types.h"
 #include "common/utils.h"
 #include "core/simple_alloc.h"
 #include "core/user_exec.h"
 #include "drivers/mailbox.h"
 #include "drivers/mbox_tags.h"
+#include "drivers/timer.h"
 #include "drivers/uart.h"
 #include "drivers/watchdog.h"
 #include "fs/file.h"
@@ -155,4 +157,23 @@ void cmd_exec(unsigned int argc, const char *argv[]) {
     return;
   }
   user_exec(buf, size);
+}
+
+void cmd_set_timeout(unsigned int argc, const char *argv[]) {
+  if (argc != 3) {
+    uart_send_string("Usage: set_timeout <message> <seconds>\r\n");
+    return;
+  }
+  int time = atoi(argv[2]);
+  if (time <= 0) {
+    uart_send_string("Invalid time\r\n");
+    return;
+  }
+  char *msg = simple_alloc(strlen(argv[1]) + 3);
+  strcpy(msg, argv[1]);
+  msg[strlen(argv[1])] = '\r';
+  msg[strlen(argv[1]) + 1] = '\n';
+  msg[strlen(argv[1]) + 2] = '\0';
+
+  timer_add_task((timer_handler_t)uart_send_string, (void *)msg, time);
 }

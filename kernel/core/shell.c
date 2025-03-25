@@ -1,7 +1,7 @@
 #include "core/shell.h"
-#include "core/command.h"
 #include "common/string.h"
 #include "common/types.h"
+#include "core/command.h"
 #include "drivers/uart.h"
 
 static command_t command[] = {{"help", cmd_help},
@@ -12,10 +12,11 @@ static command_t command[] = {{"help", cmd_help},
                               {"cat", cmd_cat},
                               {"mem_alloc", cmd_mem_alloc},
                               {"exec", cmd_exec},
+                              {"set_timeout", cmd_set_timeout},
                               {0, 0}};
 
 void shell_start() {
-  char s[] __attribute__((aligned(8))) = "Hello, world!\r\n";
+  char s[] __attribute__((aligned(8))) = "Welcome to rpi3b+\r\n";
   uart_send_string(s);
   char buf[SHELL_BUFFER_SIZE] = {};
   int buf_len = 0;

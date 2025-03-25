@@ -1,25 +1,26 @@
 #ifndef __COMMAND_H
 #define __COMMAND_H
 
+#include "common/types.h"
+
+// typdef for command function
+typedef void (*command_func_t)(uint32_t argc, const char *argv[]);
+
 typedef struct {
   char *name;
-  void (*func)(unsigned int argc, const char *argv[]);
+  command_func_t func;
 } command_t;
 
-void cmd_help(unsigned int argc, const char *argv[]);
+#define COMMAND_FUNC(name) void cmd_##name(uint32_t argc, const char *argv[])
 
-void cmd_hello(unsigned int argc, const char *argv[]);
-
-void cmd_mailbox(unsigned int argc, const char *argv[]);
-
-void cmd_reboot(unsigned int argc, const char *argv[]);
-
-void cmd_ls(unsigned int argc, const char *argv[]);
-
-void cmd_cat(unsigned int argc, const char *argv[]);
-
-void cmd_mem_alloc(unsigned int argc, const char *argv[]);
-
-void cmd_exec(unsigned int argc, const char *argv[]);
+COMMAND_FUNC(help);
+COMMAND_FUNC(hello);
+COMMAND_FUNC(mailbox);
+COMMAND_FUNC(reboot);
+COMMAND_FUNC(ls);
+COMMAND_FUNC(cat);
+COMMAND_FUNC(mem_alloc);
+COMMAND_FUNC(exec);
+COMMAND_FUNC(set_timeout);
 
 #endif
