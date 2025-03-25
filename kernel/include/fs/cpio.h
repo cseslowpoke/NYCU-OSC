@@ -1,6 +1,11 @@
 #ifndef __CPIO_H
 #define __CPIO_H
 
+/*
+ * cpio_newc_header - representation of a newc header in a cpio archive.
+ * more information can be found at man page 5.
+ * https://man.freebsd.org/cgi/man.cgi?query=cpio&sektion=5.
+ */
 typedef struct {
   char c_magic[6];
   char c_ino[8];
@@ -18,6 +23,10 @@ typedef struct {
   char c_check[8];
 } cpio_newc_header;
 
+/*
+ * cpio_init - initialize the cpio archive.
+ * get the start address from dtb and store file to file_table in file.h.
+ */
 void cpio_init();
 
-#endif
+#endif // __CPIO_H

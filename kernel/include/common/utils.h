@@ -21,8 +21,19 @@ int atoi(const char *str);
 #define WRITE_SYSREG(sysreg, val)                                              \
   asm volatile("msr " #sysreg ", %0" : : "r"(val));
 
+/*
+ * offsetof - get the offset of a member in a struct.
+ * @param type - type of the struct.
+ * @param member - name of the member in the struct.
+ */
 #define offsetof(type, member) ((uint64_t)&((type *)0)->member)
 
+/*
+ * container_of - get the container of a member in a struct.
+ * @param ptr - pointer to the member.
+ * @param type - type of the container.
+ * @param member - name of the member in the container.
+ */
 #define container_of(ptr, type, member)                                        \
   ((type *)((char *)(ptr) - offsetof(type, member)))
 

@@ -10,7 +10,6 @@ int strcmp(const char *s1, const char *s2) {
 }
 
 char *strtok(char *str, const char delim) {
-  // static unsigned int sz1 = NULL;
   static char *s1 = NULL;
   static char *s2 = NULL;
   if (str != NULL) {
