@@ -35,6 +35,19 @@ void uart_init() {
   irq_register(AUX_IRQ_NUM, uart_irq_handler);
 }
 
+#ifdef POLLING
+void uart_send(char c) {
+  while (!(*AUX_MU_LSR & 0x20))
+    ;
+  *AUX_MU_IO = c;
+}
+
+char uart_recv() {
+  while (!(*AUX_MU_LSR & 0x1))
+    ;
+  return (uint8_t)*AUX_MU_IO;
+}
+#else
 void uart_send(char c) {
   uart_tx_buffer[uart_tx_head++] = c;
   uart_tx_head %= UART_BUFFER_SIZE;
@@ -45,6 +58,7 @@ char uart_recv() {
     ;
   return uart_rx_buffer[uart_rx_tail++];
 }
+#endif
 
 void uart_send_string(const char *str) {
   while (*str) {
