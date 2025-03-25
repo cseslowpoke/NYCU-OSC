@@ -21,4 +21,9 @@ int atoi(const char *str);
 #define WRITE_SYSREG(sysreg, val)                                              \
   asm volatile("msr " #sysreg ", %0" : : "r"(val));
 
+#define offsetof(type, member) ((uint64_t)&((type *)0)->member)
+
+#define container_of(ptr, type, member)                                        \
+  ((type *)((char *)(ptr) - offsetof(type, member)))
+
 #endif // __UTILS_H
