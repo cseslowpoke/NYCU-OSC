@@ -12,7 +12,7 @@ int main(void *dtb_addr) {
   simple_alloc_init();
   fdt_init(dtb_addr);
   cpio_init();
-  // timer_init();
+  timer_init();
   shell_start();
   return 0;
 }

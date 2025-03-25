@@ -10,6 +10,7 @@ void irq_init() {
   for (int i = 0; i < MAX_IRQ; i++) {
     irq_table[i] = NULL;
   }
+  ENABLE_IRQ();
 }
 
 void irq_register(int irq_num, irq_hadler_t handler) {
@@ -47,7 +48,7 @@ void irq_handler_entry() {
     if ((irq >> i) & 0x1) {
       if (irq_table[i] != NULL) {
         irq_table[i]();
-        return;
+        goto exit;
       }
     }
   }
@@ -56,11 +57,12 @@ void irq_handler_entry() {
     if ((irq >> i) & 0x1) {
       if (irq_table[i + 32] != NULL) {
         irq_table[i + 32]();
-        return;
+        goto exit;
       }
     }
   }
-
   timer_irq_handler();
+exit:
+  DISABLE_IRQ();
   return;
 }

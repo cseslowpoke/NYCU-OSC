@@ -28,4 +28,8 @@ void irq_disable(int irq_num);
 
 void irq_handler_entry();
 
+#define ENABLE_IRQ() asm volatile("msr daifclr, #2" ::: "memory")
+
+#define DISABLE_IRQ() asm volatile("msr daifset, #2" ::: "memory")
+
 #endif // __IRQ_H
