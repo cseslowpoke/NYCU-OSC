@@ -43,6 +43,7 @@ void irq_disable(int irq_num) {
 }
 
 void irq_handler_entry() {
+  DISABLE_IRQ();
   uint32_t irq = *IRQ_PENDING1_REG;
   for (int i = 0; i < 32; i++) {
     if ((irq >> i) & 0x1) {
@@ -63,6 +64,6 @@ void irq_handler_entry() {
   }
   timer_irq_handler();
 exit:
-  DISABLE_IRQ();
+  ENABLE_IRQ();
   return;
 }
