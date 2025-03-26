@@ -20,7 +20,7 @@ void user_exec(void *prog, uint32_t prog_len) {
                :
                : "r"(program_addr));
 
-  asm volatile("mov x0, #0x3c0\n\t"
+  asm volatile("mov x0, #0x340\n\t"
                "msr spsr_el1, x0\n\t");
 
   asm volatile("eret");

@@ -41,7 +41,7 @@ void _el1_lower_el_aarch64_sync_handler() {
   uart_send_string("\r\n\r\n");
 }
 
-void _el1_lower_el_aarch64_irq_handler() {}
+void _el1_lower_el_aarch64_irq_handler() { irq_handler_entry(); }
 
 void _el1_lower_el_aarch64_fiq_handler() {}
 
