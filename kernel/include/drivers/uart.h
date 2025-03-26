@@ -43,4 +43,6 @@ void uart_recv_bytes(unsigned char *buf, unsigned int size);
 
 void uart_irq_handler();
 
+void uart_irq_task();
+
 #endif // __UART_H

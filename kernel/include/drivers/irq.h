@@ -1,5 +1,7 @@
 #ifndef __IRQ_H
 #define __IRQ_H
+
+#include "common/list.h"
 #include "common/types.h"
 
 #define MAX_IRQ 64
@@ -31,5 +33,21 @@ void irq_handler_entry();
 #define ENABLE_IRQ() asm volatile("msr daifclr, #2" ::: "memory")
 
 #define DISABLE_IRQ() asm volatile("msr daifset, #2" ::: "memory")
+
+typedef void (*irq_task_handler_t)(void);
+
+typedef struct irq_task {
+  int priority;
+  irq_task_handler_t handler;
+  list_head_t list;
+} irq_task_t;
+
+extern list_head_t irq_task_queue;
+
+void irq_task_enqueue(int proirity, irq_task_handler_t handler);
+
+irq_task_handler_t irq_task_dequeue();
+
+void irq_task_exec();
 
 #endif // __IRQ_H

@@ -3,6 +3,7 @@
 #include "common/types.h"
 #include "common/utils.h"
 #include "core/simple_alloc.h"
+#include "drivers/irq.h"
 #include "drivers/uart.h"
 
 list_head_t timer_tasks;
@@ -17,15 +18,11 @@ void timer_init(void) {
 }
 
 void timer_irq_handler(void) {
-  // int now = READ_SYSREG(CNTPCT_EL0) / READ_SYSREG(CNTFRQ_EL0);
-  // char buf[100];
-  // uint2hex(now, buf);
-  // uart_send_string("Timer interrupt: ");
-  // uart_send_string(buf);
-  // uart_send_string("\r\n");
-  //
-  // WRITE_SYSREG(CNTP_TVAL_EL0, 2 * READ_SYSREG(CNTFRQ_EL0));
-  // Timer interrupt handler
+  WRITE_SYSREG(CNTP_CTL_EL0, 0ll);
+  irq_task_enqueue(1, timer_irq_task);
+}
+
+void timer_irq_task(void) {
   list_head_t *event = timer_tasks.next;
   list_del(event);
   timer_task_t *task = container_of(event, timer_task_t, list);
@@ -33,6 +30,7 @@ void timer_irq_handler(void) {
   if (!list_empty(&timer_tasks)) {
     timer_task_t *next = container_of(timer_tasks.next, timer_task_t, list);
     timer_set(next->time - READ_SYSREG(CNTPCT_EL0));
+    WRITE_SYSREG(CNTP_CTL_EL0, 1ll);
   } else {
     WRITE_SYSREG(CNTP_CTL_EL0, 0ll);
   }

@@ -53,6 +53,7 @@ void uart_send(char c) {
   uart_tx_head %= UART_BUFFER_SIZE;
   *AUX_MU_IER |= 0x2;
 }
+
 char uart_recv() {
   while (uart_rx_head == uart_rx_tail)
     ;
@@ -74,6 +75,10 @@ void uart_recv_bytes(unsigned char *buf, unsigned int size) {
 
 void uart_irq_handler() {
   irq_disable(AUX_IRQ_NUM);
+  irq_task_enqueue(0, uart_irq_task);
+}
+
+void uart_irq_task() {
   volatile unsigned int status = *AUX_MU_IIR;
 
   if (status & 0x1) {

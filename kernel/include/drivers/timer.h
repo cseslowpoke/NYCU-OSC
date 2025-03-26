@@ -25,6 +25,8 @@ void timer_init(void);
 
 void timer_irq_handler(void);
 
+void timer_irq_task(void);
+
 void timer_set(uint64_t time);
 
 // add a timer event that triggers after a specified time.
