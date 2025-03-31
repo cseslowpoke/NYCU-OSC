@@ -3,10 +3,10 @@
 #include "drivers/irq.h"
 
 volatile uint8_t uart_rx_buffer[UART_BUFFER_SIZE];
-volatile uint8_t uart_rx_head, uart_rx_tail;
+volatile uint32_t uart_rx_head, uart_rx_tail;
 
 volatile uint8_t uart_tx_buffer[UART_BUFFER_SIZE];
-volatile uint8_t uart_tx_head, uart_tx_tail;
+volatile uint32_t uart_tx_head, uart_tx_tail;
 
 void uart_init() {
   // setting gpio 14 and 15 to alternative function 5 (mini uart)
