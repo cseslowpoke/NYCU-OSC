@@ -18,6 +18,6 @@ SECTIONS
   _bss_begin = ALIGN(8); 
   .bss (NOLOAD): { *(.bss) }
   _bss_end = .;
-  _stack_top = 0x80000 + 0x8000; /* 32 KB stack */
+  _stack_top = 0x80000 + 0x80000; /* 512 KB stack */
   _heap_start = 0x210000;
 }
