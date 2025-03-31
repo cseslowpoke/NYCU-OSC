@@ -1,9 +1,7 @@
 #include "fs/fdt.h"
-#include "core/simple_alloc.h"
 #include "common/string.h"
-#include "common/types.h"
+#include "core/simple_alloc.h"
 #include "drivers/uart.h"
-#include "common/utils.h"
 
 static fdt_header *header;
 static char *dt_strings;
@@ -85,8 +83,7 @@ void fdt_init(void *fdt_base_address) {
   }
   dt_struct = (uint32_t *)((char *)fdt_base_address +
                            device_ptr(header->off_dt_struct));
-  dt_strings = (uint32_t *)((char *)fdt_base_address +
-                            device_ptr(header->off_dt_strings));
+  dt_strings = ((char *)fdt_base_address + device_ptr(header->off_dt_strings));
   dtb_root = parse_fdt_struct();
   if (dtb_root == NULL) {
     uart_send_string("Failed to parse FDT\r\n");
