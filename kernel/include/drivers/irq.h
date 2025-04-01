@@ -46,7 +46,9 @@ extern list_head_t irq_task_queue;
 
 void irq_task_enqueue(int proirity, irq_task_handler_t handler);
 
-irq_task_handler_t irq_task_dequeue();
+irq_task_t *irq_task_dequeue();
+
+irq_task_t *irq_task_peek();
 
 void irq_task_exec();
 
