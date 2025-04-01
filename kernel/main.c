@@ -13,6 +13,7 @@ int main(void *dtb_addr) {
   fdt_init(dtb_addr);
   cpio_init();
   timer_init();
+  timer_lab3_basic2_task();
   shell_start();
   return 0;
 }

@@ -35,4 +35,8 @@ void timer_add_task(timer_handler_t handler, void *arg, uint32_t time);
 // list of timer tasks
 extern list_head_t timer_tasks;
 
+// wrapper for lab3 basic2
+
+void timer_lab3_basic2_task(void);
+
 #endif // __TIMER_H

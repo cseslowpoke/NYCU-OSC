@@ -68,3 +68,15 @@ void timer_add_task(timer_handler_t handler, void *arg, uint32_t time) {
   }
   list_add_tail(&task->list, &timer_tasks);
 }
+
+void timer_lab3_basic2_task(void) {
+  int time = READ_SYSREG(CNTPCT_EL0);
+  int frq = READ_SYSREG(CNTFRQ_EL0);
+  uart_send_string("Current time: ");
+  char buf[100];
+  uint2hex(time / frq, buf);
+  uart_send_string(buf);
+  uart_send_string("\r\n");
+
+  timer_add_task((timer_handler_t)timer_lab3_basic2_task, NULL, 2);
+}
