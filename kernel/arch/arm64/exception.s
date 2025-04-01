@@ -96,32 +96,35 @@ set_exception_vector_table:
 .endm
 
 _el1_current_el_aarch64_sync:
+  msr daifset, #0xf
   save_all
   bl _el1_current_el_aarch64_sync_handler
   load_all
   eret
 
 _el1_current_el_aarch64_irq:
-  //msr daifset, #0x2
+  msr daifset, #0xf
   save_all
   bl _el1_current_el_aarch64_irq_handler
   load_all
-  //msr daifclr, #0x2
   eret
 
 _el1_lower_el_aarch64_sync:
+  msr daifset, #0xf
   save_all
   bl _el1_lower_el_aarch64_sync_handler
   load_all
   eret
 
 _el1_lower_el_aarch64_irq:
+  msr daifset, #0xf
   save_all
   bl _el1_lower_el_aarch64_irq_handler
   load_all
   eret
 
 not_implement_exception:
+  msr daifset, #0xf
   save_all
   bl default_exception_handler
   load_all

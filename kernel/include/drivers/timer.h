@@ -37,6 +37,6 @@ extern list_head_t timer_tasks;
 
 // wrapper for lab3 basic2
 
-void timer_lab3_basic2_task(void);
+void timer_lab3_basic2_task();
 
 #endif // __TIMER_H

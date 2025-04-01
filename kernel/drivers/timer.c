@@ -2,6 +2,7 @@
 #include "common/list.h"
 #include "common/types.h"
 #include "common/utils.h"
+#include "core/exception.h"
 #include "core/simple_alloc.h"
 #include "drivers/irq.h"
 #include "drivers/uart.h"
@@ -69,7 +70,7 @@ void timer_add_task(timer_handler_t handler, void *arg, uint32_t time) {
   list_add_tail(&task->list, &timer_tasks);
 }
 
-void timer_lab3_basic2_task(void) {
+void timer_lab3_basic2_task() {
   int time = READ_SYSREG(CNTPCT_EL0);
   int frq = READ_SYSREG(CNTFRQ_EL0);
   uart_send_string("Current time: ");

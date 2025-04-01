@@ -49,6 +49,8 @@ char uart_recv() {
 }
 #else
 void uart_send(char c) {
+  // while ((uart_tx_head + 1) % UART_BUFFER_SIZE == uart_tx_tail)
+  //   ;
   uart_tx_buffer[uart_tx_head++] = c;
   uart_tx_head %= UART_BUFFER_SIZE;
   *AUX_MU_IER |= 0x2;
@@ -73,9 +75,10 @@ void uart_recv_bytes(unsigned char *buf, unsigned int size) {
   }
 }
 
+// top-half uart interrupt handler
 void uart_irq_handler() {
-  irq_disable(AUX_IRQ_NUM);
-  irq_task_enqueue(0, uart_irq_task);
+  irq_disable(AUX_IRQ_NUM);           // mask the IRQ line to avoid re-trigger
+  irq_task_enqueue(0, uart_irq_task); // enqueue the task to the task queue
 }
 
 void uart_irq_task() {
@@ -101,5 +104,5 @@ void uart_irq_task() {
   default: {
   }
   }
-  irq_enable(AUX_IRQ_NUM);
+  irq_enable(AUX_IRQ_NUM); // unmask the IRQ line
 }

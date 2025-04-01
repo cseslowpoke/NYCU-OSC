@@ -29,7 +29,7 @@
     }                                                                          \
   } while (0)
 
-#define UART_BUFFER_SIZE 1024
+#define UART_BUFFER_SIZE 8192
 
 void uart_init();
 

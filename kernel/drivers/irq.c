@@ -48,7 +48,6 @@ void irq_disable(int irq_num) {
 }
 
 void irq_handler_entry() {
-  DISABLE_IRQ();
   irq_level++;
   uint32_t irq = *IRQ_PENDING1_REG;
   for (int i = 0; i < 32; i++) {
@@ -72,7 +71,6 @@ void irq_handler_entry() {
 exit:
   irq_task_exec();
   irq_level--;
-  ENABLE_IRQ();
   return;
 }
 
@@ -89,7 +87,6 @@ void irq_task_enqueue(int priority, irq_task_handler_t handler) {
     irq_task_t *t = container_of(pos, irq_task_t, list);
     if (t->priority < priority) {
       list_add_tail(&task->list, pos);
-      ENABLE_IRQ();
       return;
     }
   }
@@ -123,8 +120,8 @@ void irq_task_exec() {
   if (task == NULL) { // when no task in the queue
     return;
   }
-  int irq_pre_level = irq_current_priority;
-  if (task->priority >= irq_pre_level) {
+  int irq_pre_priority = irq_current_priority;
+  if (task->priority >= irq_pre_priority) {
     return;
   }
   irq_current_priority = task->priority;
@@ -134,7 +131,7 @@ void irq_task_exec() {
     if (task == NULL) { // when no task in the queue
       break;
     }
-    if (task->priority >= irq_pre_level) {
+    if (task->priority >= irq_pre_priority) {
       break;
     }
     task = irq_task_dequeue();
@@ -145,5 +142,5 @@ void irq_task_exec() {
     task->handler();
     DISABLE_IRQ();
   }
-  irq_current_priority = irq_pre_level;
+  irq_current_priority = irq_pre_priority;
 }

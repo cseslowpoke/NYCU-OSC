@@ -4,6 +4,8 @@
 #include "common/types.h"
 #include "common/utils.h"
 
+void print_exception_imformation();
+
 void default_exception_handler();
 
 void _el1_lower_el_aarch64_sync_handler();
