@@ -1,5 +1,6 @@
 #include "drivers/timer.h"
 #include "common/list.h"
+#include "common/printf.h"
 #include "common/types.h"
 #include "common/utils.h"
 #include "core/exception.h"
@@ -11,9 +12,6 @@ list_head_t timer_tasks;
 
 void timer_init(void) {
   // Initialize the timer
-  // WRITE_SYSREG(CNTP_CTL_EL0, 1ll);
-  // WRITE_SYSREG(CNTP_TVAL_EL0, 2 * READ_SYSREG(CNTFRQ_EL0));
-
   INIT_LIST_HEAD(&timer_tasks);
   *CORE0_TIMER_IRQ_CTRL = 2;
 }
@@ -73,11 +71,6 @@ void timer_add_task(timer_handler_t handler, void *arg, uint32_t time) {
 void timer_lab3_basic2_task() {
   int time = READ_SYSREG(CNTPCT_EL0);
   int frq = READ_SYSREG(CNTFRQ_EL0);
-  uart_send_string("Current time: ");
-  char buf[100];
-  uint2hex(time / frq, buf);
-  uart_send_string(buf);
-  uart_send_string("\r\n");
-
+  printf("Current time: %d\r\n", time / frq);
   timer_add_task((timer_handler_t)timer_lab3_basic2_task, NULL, 2);
 }

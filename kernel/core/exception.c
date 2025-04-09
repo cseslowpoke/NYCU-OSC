@@ -1,4 +1,5 @@
 #include "core/exception.h"
+#include "common/printf.h"
 #include "common/types.h"
 #include "common/utils.h"
 #include "drivers/irq.h"
@@ -8,19 +9,11 @@
 void print_exception_imformation() {
   char buf[100];
   uint64_t reg = READ_SYSREG(ELR_EL1);
-  uint2hex(reg, buf);
-  uart_send_string("ELR_EL1: ");
-  uart_send_string(buf);
-  uart_send_string("\r\n");
+  printf("ELR_EL1: %x\r\n", reg);
   reg = READ_SYSREG(SPSR_EL1);
-  uint2hex(reg, buf);
-  uart_send_string("SPSR_EL1: ");
-  uart_send_string(buf);
-  uart_send_string("\r\n");
+  printf("SPSR_EL1: %x\r\n", reg);
   reg = READ_SYSREG(ESR_EL1);
-  uart_send_string("ESR_EL1: ");
-  uart_send_string(buf);
-  uart_send_string("\r\n\r\n");
+  printf("ESR_EL1: %x\r\n\r\n", reg);
 }
 
 void default_exception_handler() { print_exception_imformation(); }

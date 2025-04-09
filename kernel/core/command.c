@@ -1,3 +1,4 @@
+#include "common/printf.h"
 #include "common/string.h"
 #include "common/types.h"
 #include "common/utils.h"
@@ -11,17 +12,17 @@
 #include "fs/file.h"
 
 void cmd_help(unsigned int argc, const char *argv[]) {
-  uart_send_string("help      : print this help menu\r\n"
-                   "hello     : print Hello World!\r\n"
-                   "mailbox   : print hardware's information\r\n"
-                   "reboot    : reboot the device\r\n"
-                   "ls        : list files in the initramfs\r\n"
-                   "cat       : print the content of a file\r\n"
-                   "mem_alloc : allocate memory\r\n");
+  printf("help      : print this help menu\r\n"
+         "hello     : print Hello World!\r\n"
+         "mailbox   : print hardware's information\r\n"
+         "reboot    : reboot the device\r\n"
+         "ls        : list files in the initramfs\r\n"
+         "cat       : print the content of a file\r\n"
+         "mem_alloc : allocate memory\r\n");
 }
 
 void cmd_hello(unsigned int argc, const char *argv[]) {
-  uart_send_string("Hello, world!\r\n");
+  printf("Hello, world!\r\n");
 }
 
 static int get_board_revision() {
@@ -68,35 +69,25 @@ static arm_memory_t get_arm_memory() {
 
 void cmd_mailbox(unsigned int argc, const char *argv[]) {
   char hexstr_buf[9] = {};
-  uart_send_string("Mailbox info:\r\n");
+  printf("Mailbox info:\r\n");
   // Board information
   unsigned int board_revision = get_board_revision();
-  uart_send_string("Board revision: 0x");
-  uint2hex(board_revision, hexstr_buf);
-  uart_send_string(hexstr_buf);
-  uart_send_string("\r\n");
+  printf("Board revision: 0x%x\r\n", board_revision);
   // Arm memory information
   arm_memory_t arm_memory = get_arm_memory();
-  uart_send_string("Arm memory base address: 0x");
-  uint2hex(arm_memory.base, hexstr_buf);
-  uart_send_string(hexstr_buf);
-  uart_send_string("\r\n");
-  uart_send_string("Arm memory size: 0x");
-  uint2hex(arm_memory.size, hexstr_buf);
-  uart_send_string(hexstr_buf);
-  uart_send_string("\r\n");
+  printf("Arm memory base address: 0x%x\r\n", arm_memory.base);
+  printf("Arm memory size: 0x%x\r\n", arm_memory.size);
 }
 
 void cmd_reboot(unsigned int argc, const char *argv[]) {
-  uart_send_string("reboot\r\n");
+  printf("Rebooting...\r\n");
   reset(100);
   while (1)
     ;
 }
 
 static void cmd_ls_append_ln(const char *filename) {
-  uart_send_string(filename);
-  uart_send_string("\r\n");
+  printf("%s\r\n", filename);
 }
 
 void cmd_ls(unsigned int argc, const char *argv[]) {
@@ -105,13 +96,13 @@ void cmd_ls(unsigned int argc, const char *argv[]) {
 
 void cmd_cat(unsigned int argc, const char *argv[]) {
   if (argc != 2) {
-    uart_send_string("Usage: cat <filename>\r\n");
+    printf("Usage: cat <filename>\r\n");
     return;
   }
   char *buf;
   int size = file_find(argv[1], &buf);
   if (size == -1) {
-    uart_send_string("File not found: \r\n");
+    printf("File not found: \r\n");
     return;
   }
   while (size--) {
@@ -120,40 +111,36 @@ void cmd_cat(unsigned int argc, const char *argv[]) {
     }
     uart_send(*buf++);
   }
-  uart_send_string("\r\n");
+  printf("\r\n");
 }
 
 void cmd_mem_alloc(unsigned int argc, const char *argv[]) {
   if (argc != 2) {
-    uart_send_string("Usage: mem_alloc <size>\r\n");
+    printf("Usage: mem_alloc <size>\r\n");
     return;
   }
   int size = atoi(argv[1]);
   if (size <= 0) {
-    uart_send_string("Invalid size\r\n");
+    printf("Invalid size\r\n");
     return;
   }
   void *ptr = simple_alloc(size);
   if (ptr == NULL) {
-    uart_send_string("Failed to allocate memory\r\n");
+    printf("Failed to allocate memory\r\n");
     return;
   }
-  uart_send_string("Allocated memory at: 0x");
-  char hexstr_buf[9] = {};
-  uint2hex((uint64_t)ptr, hexstr_buf);
-  uart_send_string(hexstr_buf);
-  uart_send_string("\r\n");
+  printf("Allocated Memory at 0x%x\r\n", (uint64_t)ptr);
 }
 
 void cmd_exec(unsigned int argc, const char *argv[]) {
   if (argc != 2) {
-    uart_send_string("Usage: user_exec <filename>\r\n");
+    printf("Usage: user_exec <filename>\r\n");
     return;
   }
   char *buf;
   int size = file_find(argv[1], &buf);
   if (size == -1) {
-    uart_send_string("File not found: \r\n");
+    printf("File not found: \r\n");
     return;
   }
   user_exec(buf, size);
@@ -161,12 +148,12 @@ void cmd_exec(unsigned int argc, const char *argv[]) {
 
 void cmd_set_timeout(unsigned int argc, const char *argv[]) {
   if (argc != 3) {
-    uart_send_string("Usage: set_timeout <message> <seconds>\r\n");
+    printf("Usage: set_timeout <message> <seconds>\r\n");
     return;
   }
   int time = atoi(argv[2]);
   if (time <= 0) {
-    uart_send_string("Invalid time\r\n");
+    printf("Invalid time\r\n");
     return;
   }
   char *msg = simple_alloc(strlen(argv[1]) + 3);

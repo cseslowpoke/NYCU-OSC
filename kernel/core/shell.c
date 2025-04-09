@@ -1,4 +1,5 @@
 #include "core/shell.h"
+#include "common/printf.h"
 #include "common/string.h"
 #include "common/types.h"
 #include "core/command.h"
@@ -16,23 +17,22 @@ static command_t command[] = {{"help", cmd_help},
                               {0, 0}};
 
 void shell_start() {
-  char s[] __attribute__((aligned(8))) = "Welcome to rpi3b+\r\n";
-  uart_send_string(s);
+  printf("Welcome to rpi3b+\r\n");
   char buf[SHELL_BUFFER_SIZE] = {};
   int buf_len = 0;
-  uart_send_string("# ");
+  printf("# ");
   while (1) {
     char c = uart_recv();
     if (c == '\r' || c == '\n') {
-      uart_send_string("\r\n");
+      printf("\r\n");
       buf[buf_len] = '\0';
       shell_process_command(buf, buf_len);
       buf_len = 0;
-      uart_send_string("# ");
+      printf("# ");
     } else if (c == '\b' || c == 127) {
       if (buf_len > 0) {
         buf_len--;
-        uart_send_string("\b \b");
+        printf("\b \b");
       }
     } else if (buf_len < SHELL_BUFFER_SIZE - 1) {
       buf[buf_len++] = c;
@@ -62,10 +62,8 @@ void shell_process_command(char *buf, int buf_len) {
       iter++;
       continue;
     }
-    command[iter].func(argc, argv);
+    command[iter].func(argc, (const char **)argv);
     return;
   }
-  uart_send_string("command not found: ");
-  uart_send_string(argv[0]);
-  uart_send_string("\r\n");
+  printf("command not found: %s\r\n", argv[0]);
 }

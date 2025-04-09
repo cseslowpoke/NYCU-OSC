@@ -5,6 +5,35 @@
 
 void delay_cycles(int cycles);
 
+/*
+ * itoa_base - convert an integer to a string in a specified base.
+ * @param val - the integer value to convert.
+ * @param buf - the buffer to store the converted string.
+ * @param base - the base to convert to (2, 8, 10, 16).
+ * @param width - the minimum width of the output string, except for 0.
+ *                if width is 0, will use original number width.
+ * @param zero_pad - if true, pad with zeros instead of spaces.
+ * @param uppercase - if true, use uppercase letters for hex digits.
+ */
+void itoa_base(unsigned long long val, char *buf, int base, int width,
+               int zero_pad, int uppercase);
+
+/*
+ * itoa_dec - convert a decimal integer to a string.
+ *            A wrapper of itoa_base with base 10.
+ * @param val - the integer value to convert.
+ * @param buf - the buffer to store the converted string.
+ */
+void itoa_dec(int val, char *buf);
+
+/*
+ * itoa_hex - convert a hexadecimal integer to a string.
+ *           A wrapper of itoa_base with base 16.
+ * @param val - the integer value to convert.
+ * @param buf - the buffer to store the converted string.
+ */
+void itoa_hex(int val, char *buf);
+
 void uint2hex(uint32_t val, char *buf);
 
 uint32_t hex2uint(char *hex, int size);
