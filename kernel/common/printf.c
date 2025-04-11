@@ -42,6 +42,16 @@ int vsprintf(char *buf, const char *fmt, va_list args) {
       }
       break;
     }
+    case 'p': {
+      const void *p = va_arg(args, void *);
+      char itoa_buf[32];
+      itoa_base((uint64_t)p, itoa_buf, 16, 0, 0, 1);
+      char *itoa_ptr = itoa_buf;
+      while (*itoa_ptr) {
+        *str++ = *itoa_ptr++;
+      }
+      break;
+    }
     // NOTE: can add more format specifiers here
     default:
       *str++ = '%';
