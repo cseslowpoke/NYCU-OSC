@@ -1,6 +1,7 @@
 #include "fs/fdt.h"
 #include "common/string.h"
-#include "core/simple_alloc.h"
+// #include "core/kmalloc.h"
+#include "core/slab.h"
 #include "drivers/uart.h"
 
 static fdt_header *header;
@@ -8,7 +9,7 @@ static char *dt_strings;
 static uint32_t *dt_struct;
 
 dtb_node_t *parse_fdt_struct() {
-  dtb_node_t *node = simple_alloc(sizeof(dtb_node_t));
+  dtb_node_t *node = kmalloc(sizeof(dtb_node_t));
   static char name_buf[256];
   while (device_ptr(*dt_struct) == FDT_NOP) {
     dt_struct++;
@@ -21,7 +22,7 @@ dtb_node_t *parse_fdt_struct() {
       dt_struct = (uint32_t *)((char *)dt_struct + 1);
     }
     name_buf[name_len] = '\0';
-    node->name = simple_alloc(name_len + 1);
+    node->name = kmalloc(name_len + 1);
     node->name = strcpy(node->name, name_buf);
     dt_struct = (uint32_t *)((char *)dt_struct + 1);
     dt_struct = (uint32_t *)(((uint64_t)dt_struct + 3) & ~3);
@@ -33,7 +34,7 @@ dtb_node_t *parse_fdt_struct() {
   }
   dtb_property_t **prop_now = &node->properties;
   while (device_ptr(*dt_struct) == FDT_PROP) {
-    dtb_property_t *prop = simple_alloc(sizeof(dtb_property_t));
+    dtb_property_t *prop = kmalloc(sizeof(dtb_property_t));
     *prop_now = prop;
     dt_struct++;
     uint32_t len = device_ptr(*dt_struct);
@@ -44,7 +45,7 @@ dtb_node_t *parse_fdt_struct() {
     char *prop_name = (char *)dt_strings + nameoff;
     prop->name = prop_name;
     prop->length = len;
-    void *value_buf = simple_alloc(len);
+    void *value_buf = kmalloc(len);
     prop->value = value_buf;
 
     while (len > 0) {

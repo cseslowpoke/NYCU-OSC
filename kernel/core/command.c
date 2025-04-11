@@ -3,6 +3,7 @@
 #include "common/types.h"
 #include "common/utils.h"
 #include "core/simple_alloc.h"
+#include "core/slab.h"
 #include "core/user_exec.h"
 #include "drivers/mailbox.h"
 #include "drivers/mbox_tags.h"
@@ -156,7 +157,7 @@ void cmd_set_timeout(unsigned int argc, const char *argv[]) {
     printf("Invalid time\r\n");
     return;
   }
-  char *msg = simple_alloc(strlen(argv[1]) + 3);
+  char *msg = (char *)kmalloc(strlen(argv[1]) + 3);
   strcpy(msg, argv[1]);
   msg[strlen(argv[1])] = '\r';
   msg[strlen(argv[1]) + 1] = '\n';

@@ -4,7 +4,7 @@
 #include "common/types.h"
 #include "common/utils.h"
 #include "core/exception.h"
-#include "core/simple_alloc.h"
+#include "core/slab.h"
 #include "drivers/irq.h"
 #include "drivers/uart.h"
 
@@ -35,13 +35,14 @@ void timer_irq_task(void) {
   }
 
   // NOTE: should free event after implement complex allocator
+  kfree(task);
 }
 
 void timer_set(uint64_t time) { WRITE_SYSREG(CNTP_TVAL_EL0, time); }
 
 void timer_add_task(timer_handler_t handler, void *arg, uint32_t time) {
   // Add a timer event that triggers after a specified time
-  timer_task_t *task = (timer_task_t *)simple_alloc(sizeof(timer_task_t));
+  timer_task_t *task = (timer_task_t *)kmalloc(sizeof(timer_task_t));
   task->func = handler;
   task->arg = arg;
   task->time = READ_SYSREG(CNTPCT_EL0) + time * READ_SYSREG(CNTFRQ_EL0);
