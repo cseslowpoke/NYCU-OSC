@@ -18,8 +18,6 @@
 
 typedef void (*irq_hadler_t)(void);
 
-extern irq_hadler_t irq_table[MAX_IRQ];
-
 void irq_init();
 
 void irq_register(int irq_num, irq_hadler_t handler);
@@ -34,6 +32,8 @@ void irq_handler_entry();
 
 #define DISABLE_IRQ() asm volatile("msr daifset, #0xf" ::: "memory")
 
+#define IRQ_TASK_MEMORY_POOL_SIZE 100
+
 typedef void (*irq_task_handler_t)(void);
 
 typedef struct irq_task {
@@ -41,8 +41,6 @@ typedef struct irq_task {
   irq_task_handler_t handler;
   list_head_t list;
 } irq_task_t;
-
-extern list_head_t irq_task_queue;
 
 void irq_task_enqueue(int proirity, irq_task_handler_t handler);
 

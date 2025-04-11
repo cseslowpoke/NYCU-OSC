@@ -1,10 +1,13 @@
 #include "drivers/irq.h"
 #include "common/list.h"
 #include "common/utils.h"
-#include "core/simple_alloc.h"
 #include "drivers/timer.h"
 
-irq_hadler_t irq_table[MAX_IRQ];
+static irq_hadler_t irq_table[MAX_IRQ];
+
+static list_head_t irq_task_free_list;
+static irq_task_t irq_task_memory_pool[IRQ_TASK_MEMORY_POOL_SIZE];
+static list_head_t irq_task_queue;
 
 static uint32_t irq_level;
 static uint32_t irq_current_priority;
@@ -14,7 +17,14 @@ void irq_init() {
     irq_table[i] = NULL;
   }
   INIT_LIST_HEAD(&irq_task_queue);
+  INIT_LIST_HEAD(&irq_task_free_list);
+  for (int i = 0; i < IRQ_TASK_MEMORY_POOL_SIZE; i++) {
+    INIT_LIST_HEAD(&irq_task_memory_pool[i].list);
+    list_add_tail(&irq_task_memory_pool[i].list, &irq_task_free_list);
+  }
+
   irq_current_priority = 0x3f3f3f3f;
+
   ENABLE_IRQ();
 }
 
@@ -74,10 +84,10 @@ exit:
   return;
 }
 
-list_head_t irq_task_queue;
-
 void irq_task_enqueue(int priority, irq_task_handler_t handler) {
-  irq_task_t *task = (irq_task_t *)simple_alloc(sizeof(irq_task_t));
+  irq_task_t *task =
+      (irq_task_t *)list_entry(irq_task_free_list.next, irq_task_t, list);
+  list_del(irq_task_free_list.next);
   // NOTE: Should handle allocation failure
 
   task->priority = priority;
@@ -141,6 +151,7 @@ void irq_task_exec() {
     ENABLE_IRQ();
     task->handler();
     DISABLE_IRQ();
+    list_add_tail(&task->list, &irq_task_free_list);
   }
   irq_current_priority = irq_pre_priority;
 }
