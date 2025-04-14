@@ -8,31 +8,7 @@
  * - void mm_init(): Initialize the memory management system.
  * - void *mm_alloc(uint32_t size): Allocate memory of the specified size.
  * - void mm_free(void *ptr): Free the allocated memory.
- * - void mm_reserve(uint64_t begin, uint64_t end): Reserve a range of memory.
- *   Procedure:
- *   - Start from nearest page of begin address.
- *   - if this page is in free list, remove it from free list.
- *   - set page as used.
- *   - Recursively move upward through higher order.
- *     - At each level, try to move buddy block to the free list.
- *     - choose next block with smaller id.
- *     - stop when level is MAX_ORDER.
- *
- *   Graph Example:
- *     Assume we has 8 pages of memory, and we want to reserve [4]
- *     Recursively find which page should add to free list.
- *     and remove root from free_list[MAX_ORDER].
- *      +-------------------------------+
- *      |               x               | <- 4. [0] should be remove from free_list[3].
- *      +---------------+---------------+
- *      |       o       |       x       | <- 3. [0] should add to free_list[2].
- *      +-------+-------+-------+-------+
- *      |       |       |   x   |   o   | <- 2. [6] should add to free_list[1].
- *      +---+---+---+---+---+---+---+---+
- *      |   |   |   |   | x | o |   |   | <- 1. Reserve at x [4], [5] should add to free_list[0].
- *      +---+---+---+---+---+---+---+---+
- *
- *     Complexity: O(log(n)).
+ * - void mm_reserve_region(uint64_t begin, uint64_t end): Reserve a memory region.
  */
 // clang-format on
 
@@ -138,25 +114,21 @@ void *mm_alloc(uint32_t size) {
   if (offer > MAX_ORDER) {
     return NULL;
   }
-
   int i = offer;
   for (; i < MAX_ORDER; i++) {
     if (!list_empty(&free_list[i])) {
       break;
     }
   }
-
   if (list_empty(&free_list[i])) {
     return NULL;
   }
   printf("[mm] offer: %d, i: %d\r\n", offer, i);
-
   page_t *block = list_entry(free_list[i].next, page_t, list);
   list_del(&block->list);
   printf("[mm] block_id: %x\r\n", block->id);
 
   for (int j = i; j > offer; j--) {
-
     // find buddy block
     int buddy_id = block->id ^ (1 << (j - 1));
     printf("[mm] buddy_id: %x\r\n", buddy_id);
@@ -164,12 +136,10 @@ void *mm_alloc(uint32_t size) {
     buddy->id = buddy_id;
     buddy->order = j - 1;
     buddy->used = 0;
-
     list_add(&buddy->list, &free_list[j - 1]);
   }
   block->order = offer;
   block->used = 1;
-
   printf("[mm] alloc: 0x%p, order: %d, id: %x\r\n",
          (void *)(uint64_t)(block->id * PAGE_SIZE + MM_ZONE_BEGIN),
          block->order, block->id);
@@ -182,7 +152,6 @@ void mm_free(void *ptr) {
   uint32_t id = ((uint32_t)(uint64_t)ptr - MM_ZONE_BEGIN) / PAGE_SIZE;
   page_t *block = &page_meta[id];
   block->used = 0;
-
   printf("[mm] free: 0x%p, order: %d, id: %x\r\n",
          (void *)(uint64_t)(block->id * PAGE_SIZE + MM_ZONE_BEGIN),
          block->order, block->id);
@@ -190,13 +159,10 @@ void mm_free(void *ptr) {
   while (block->order < MAX_ORDER) {
     int buddy_id = block->id ^ (1 << block->order);
     page_t *buddy = &page_meta[buddy_id];
-
     if (buddy->used == 1) {
       break;
     }
-
     printf("[mm] buddy_id: %x\r\n", buddy_id);
-
     list_del(&buddy->list);
     block = block->id < buddy->id ? block : buddy;
     block->order++;

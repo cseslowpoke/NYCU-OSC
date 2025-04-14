@@ -43,8 +43,6 @@ typedef struct {
 static reserved_region_t reserved_regions[MAX_RESERVED_REGIONS];
 static int reserved_count = 0;
 
-void mm_reserve(uint64_t begin, uint64_t end);
-
 void mm_reserve_region(uint64_t begin, uint64_t end);
 
 #endif // __MM_H
