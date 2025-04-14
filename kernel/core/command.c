@@ -69,7 +69,6 @@ static arm_memory_t get_arm_memory() {
 }
 
 void cmd_mailbox(unsigned int argc, const char *argv[]) {
-  char hexstr_buf[9] = {};
   printf("Mailbox info:\r\n");
   // Board information
   unsigned int board_revision = get_board_revision();

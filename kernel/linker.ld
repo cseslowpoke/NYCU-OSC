@@ -1,6 +1,7 @@
 SECTIONS
 {
   . = 0x80000;
+  __kernel_start = .;
   .text.boot : { KEEP(*(.text.boot)) }
   .text.exception : {KEEP(*(.text.exception))}
   .text : { *(.text) }
@@ -18,6 +19,10 @@ SECTIONS
   _bss_begin = ALIGN(8); 
   .bss (NOLOAD): { *(.bss) }
   _bss_end = .;
-  _stack_top = 0x80000 + 0x80000; /* 512 KB stack */
-  _heap_start = 0x210000;
+  
+  . = ALIGN(16); /* stack should aligned 0x10 */
+  _stack_top = . + 0x80000; /* 512 KB stack */
+  __kernel_end = . + 0x80000;
+  __simple_alloc_start = 0x10000000;
+  __simple_alloc_end =   0x20000000;
 }

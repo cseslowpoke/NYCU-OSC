@@ -1,14 +1,11 @@
 #ifndef __SIMPLE_ALLOC_H
 #define __SIMPLE_ALLOC_H
 
-extern char _heap_start;
-
-static volatile char *heap_start;
-static volatile char *heap_end;
-static volatile char *heap_current;
-
 void *simple_alloc(unsigned int size);
 
 void simple_alloc_init();
+
+void *simple_alloc_begin(); // returns _heap_start
+void *simple_alloc_end();   // returns current ptr
 
 #endif

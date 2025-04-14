@@ -1,10 +1,11 @@
 #include "fs/cpio.h"
-#include "fs/fdt.h"
-#include "fs/file.h"
 #include "common/string.h"
 #include "common/types.h"
-#include "drivers/uart.h"
 #include "common/utils.h"
+#include "core/mm.h"
+#include "drivers/uart.h"
+#include "fs/fdt.h"
+#include "fs/file.h"
 
 void cpio_init() {
   char *name_list[2];
@@ -17,6 +18,11 @@ void cpio_init() {
   }
   uint32_t *base_addr = (uint32_t *)(uint64_t)device_ptr(
       *(uint32_t *)dtb_find_property(chosen_node, "linux,initrd-start"));
+  uint32_t *end_addr = (uint32_t *)(uint64_t)device_ptr(
+      *(uint32_t *)dtb_find_property(chosen_node, "linux,initrd-end"));
+
+  mm_reserve_region((uint64_t)base_addr, (uint64_t)end_addr);
+
   volatile cpio_newc_header *header = (volatile cpio_newc_header *)base_addr;
   while (1) {
     if (header->c_magic[0] != '0' || header->c_magic[1] != '7' ||
