@@ -150,6 +150,9 @@ void *mm_alloc(uint32_t size) {
 void mm_free(void *ptr) {
   uint32_t id = ((uint32_t)(uint64_t)ptr - MM_ZONE_BEGIN) / PAGE_SIZE;
   page_t *block = &page_meta[id];
+  if (block->used == 0) {
+    return;
+  }
   block->used = 0;
   printf("[mm][page] free: 0x%p, order: %d, id: %x\r\n",
          (void *)(uint64_t)(block->id * PAGE_SIZE + MM_ZONE_BEGIN),
