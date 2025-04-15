@@ -8,7 +8,7 @@
  * - void mm_init(): Initialize the memory management system.
  * - void *mm_alloc(uint32_t size): Allocate memory of the specified size.
  * - void mm_free(void *ptr): Free the allocated memory.
- * - void mm_reserve_region(uint64_t begin, uint64_t end): Reserve a memory region.
+ * - void mm_reserve_region(uint64_t begin, uint64_t end): Reserve a memory region [begin, end).
  */
 // clang-format on
 
@@ -39,11 +39,9 @@ void mm_init() {
     page_meta[i].order = -1;
     INIT_LIST_HEAD(&page_meta[i].list);
   }
-  // printf("%d", max_order_size);
   for (int i = 0; i < max_order_size; i++) {
     page_meta[i << MAX_ORDER].order = MAX_ORDER;
     page_meta[i << MAX_ORDER].used = 0;
-    printf("[mm] block id = 0x%x\r\n", i << MAX_ORDER);
     list_add_tail(&page_meta[i << MAX_ORDER].list, &free_list[MAX_ORDER]);
   }
 
@@ -82,14 +80,17 @@ void mm_init() {
       for (int k = 0; k <= MAX_ORDER; k++) {
         page_t *buddy = &page_meta[block->id ^ (1 << k)];
         if (buddy->used == 1) {
+          printf("[mm][+] buddy id: 0x%x, order: %d\r\n", block->id, k);
           list_add(&block->list, &free_list[k]);
           block->order = k;
           break;
         }
         if (buddy->order == k) {
+          printf("[mm][-] buddy id: 0x%x, order: %d\r\n", buddy->id, k);
           list_del(&buddy->list);
           block = block->id < buddy->id ? block : buddy;
         } else {
+          printf("[mm][+] buddy id: 0x%x, order: %d\r\n", block->id, k);
           list_add(&block->list, &free_list[k]);
           block->order = k;
           break;
@@ -123,24 +124,23 @@ void *mm_alloc(uint32_t size) {
   if (list_empty(&free_list[i])) {
     return NULL;
   }
-  printf("[mm] offer: %d, i: %d\r\n", offer, i);
   page_t *block = list_entry(free_list[i].next, page_t, list);
   list_del(&block->list);
-  printf("[mm] block_id: %x\r\n", block->id);
+  printf("[mm][-] buddy_id: 0x%x, order: %d\r\n", block->id, i);
 
   for (int j = i; j > offer; j--) {
     // find buddy block
     int buddy_id = block->id ^ (1 << (j - 1));
-    printf("[mm] buddy_id: %x\r\n", buddy_id);
     page_t *buddy = &page_meta[buddy_id];
     buddy->id = buddy_id;
     buddy->order = j - 1;
     buddy->used = 0;
     list_add(&buddy->list, &free_list[j - 1]);
+    printf("[mm][+] buddy id: 0x%x, order: %d\r\n", buddy->id, j - 1);
   }
   block->order = offer;
   block->used = 1;
-  printf("[mm] alloc: 0x%p, order: %d, id: %x\r\n",
+  printf("[mm][page] alloc: 0x%p, order: %d, id: %x\r\n",
          (void *)(uint64_t)(block->id * PAGE_SIZE + MM_ZONE_BEGIN),
          block->order, block->id);
 
@@ -148,11 +148,10 @@ void *mm_alloc(uint32_t size) {
 }
 
 void mm_free(void *ptr) {
-  printf("[mm] free: 0x%p\r\n", ptr);
   uint32_t id = ((uint32_t)(uint64_t)ptr - MM_ZONE_BEGIN) / PAGE_SIZE;
   page_t *block = &page_meta[id];
   block->used = 0;
-  printf("[mm] free: 0x%p, order: %d, id: %x\r\n",
+  printf("[mm][page] free: 0x%p, order: %d, id: %x\r\n",
          (void *)(uint64_t)(block->id * PAGE_SIZE + MM_ZONE_BEGIN),
          block->order, block->id);
 
@@ -162,11 +161,12 @@ void mm_free(void *ptr) {
     if (buddy->used == 1) {
       break;
     }
-    printf("[mm] buddy_id: %x\r\n", buddy_id);
+    printf("[mm][-] buddy id: 0x%x, order: %d\r\n", buddy->id, buddy->order);
     list_del(&buddy->list);
     block = block->id < buddy->id ? block : buddy;
     block->order++;
   }
+  printf("[mm][+] buddy_id: 0x%x, order %d\r\n", block->id, block->order);
   list_add(&block->list, &free_list[block->order]);
 }
 

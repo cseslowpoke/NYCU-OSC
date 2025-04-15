@@ -86,7 +86,6 @@ void *kmem_cache_alloc(uint32_t class) {
   if (class >= KMEM_SIZE_CLASS) {
     return NULL;
   }
-
   // allocate a new slab
   if (list_empty(&kmem_caches[class].partial_list)) {
     if (!list_empty(&kmem_caches[class].free_list)) {
@@ -105,7 +104,6 @@ void *kmem_cache_alloc(uint32_t class) {
   kmem_slab_t *slab =
       list_entry(kmem_caches[class].partial_list.next, kmem_slab_t, list);
   if (slab->inuse == slab->total - 1) {
-    // printf("[kmem] slab %p is full\r\n", slab);
     list_del(&slab->list);
     list_add(&slab->list, &kmem_caches[class].full_list);
   }
@@ -113,7 +111,8 @@ void *kmem_cache_alloc(uint32_t class) {
 
   void *ptr = slab->free_list.next;
   list_del(slab->free_list.next);
-
+  printf("[slab] alloc: 0x%p, chuck size: %d\r\n", ptr,
+         kmem_size_classes[class]);
   return ptr;
 }
 
@@ -125,6 +124,8 @@ void kmem_cache_free(void *ptr) {
   kmem_slab_t *slab = (kmem_slab_t *)page->slab;
   INIT_LIST_HEAD((list_head_t *)ptr);
   list_add((list_head_t *)ptr, &slab->free_list);
+  printf("[slab] free: 0x%p, chuck size: %d\r\n", ptr,
+         kmem_size_classes[slab->class]);
 
   // check if slab is full
   if (slab->inuse == slab->total) {

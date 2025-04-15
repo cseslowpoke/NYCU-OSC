@@ -22,7 +22,6 @@ typedef struct page {
 } page_t;
 
 extern page_t *page_meta;
-// extern page_t page_meta[(MM_ZONE_END - MM_ZONE_BEGIN) / PAGE_SIZE];
 
 #define addr_to_page(addr)                                                     \
   (&page_meta[(((uint64_t)(addr) - MM_ZONE_BEGIN) / PAGE_SIZE)])
