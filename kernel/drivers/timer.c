@@ -4,9 +4,9 @@
 #include "common/types.h"
 #include "common/utils.h"
 #include "core/exception.h"
-#include "core/slab.h"
 #include "drivers/irq.h"
 #include "drivers/uart.h"
+#include "mm/slab.h"
 
 list_head_t timer_tasks;
 

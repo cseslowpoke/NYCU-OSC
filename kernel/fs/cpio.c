@@ -2,10 +2,10 @@
 #include "common/string.h"
 #include "common/types.h"
 #include "common/utils.h"
-#include "core/mm.h"
 #include "drivers/uart.h"
 #include "fs/fdt.h"
 #include "fs/file.h"
+#include "mm/mm.h"
 
 void cpio_init() {
   char *name_list[2];

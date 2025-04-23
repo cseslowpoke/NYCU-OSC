@@ -2,8 +2,6 @@
 #include "common/string.h"
 #include "common/types.h"
 #include "common/utils.h"
-#include "core/simple_alloc.h"
-#include "core/slab.h"
 #include "core/user_exec.h"
 #include "drivers/mailbox.h"
 #include "drivers/mbox_tags.h"
@@ -11,6 +9,8 @@
 #include "drivers/uart.h"
 #include "drivers/watchdog.h"
 #include "fs/file.h"
+#include "mm/simple_alloc.h"
+#include "mm/slab.h"
 
 void cmd_help(unsigned int argc, const char *argv[]) {
   printf("help      : print this help menu\r\n"

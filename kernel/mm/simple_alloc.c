@@ -1,4 +1,4 @@
-#include "core/simple_alloc.h"
+#include "mm/simple_alloc.h"
 #include "common/types.h"
 
 extern char __simple_alloc_start[];

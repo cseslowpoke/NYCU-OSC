@@ -1,13 +1,13 @@
 #include "common/printf.h"
-#include "core/mm.h"
 #include "core/shell.h"
-#include "core/simple_alloc.h"
-#include "core/slab.h"
 #include "drivers/irq.h"
 #include "drivers/timer.h"
 #include "drivers/uart.h"
 #include "fs/cpio.h"
 #include "fs/fdt.h"
+#include "mm/mm.h"
+#include "mm/simple_alloc.h"
+#include "mm/slab.h"
 
 extern char __kernel_start[];
 extern char __kernel_end[];
@@ -23,21 +23,7 @@ int main(void *dtb_addr) {
   mm_init();
   kmem_cache_init();
   timer_init();
-  // int *a = mm_alloc(0x20000);
-  // mm_free(a);
-  // a = kmalloc(0x1000);
-  // kfree(a);
-  // void *a[10000];
-  // for (int i = 0; i < 10000; i++) {
-  //   a[i] = kmalloc(0x1000);
-  //   // printf("kmalloc: 0x%p\r\n", a);
-  // }
-  // for (int i = 0; i < 10000; i++) {
-  //   kfree(a[i]);
-  //   // printf("kfree: 0x%p\r\n", a);
-  // }
 
-  // timer_lab3_basic2_task();
   shell_start();
   return 0;
 }

@@ -1,8 +1,8 @@
 #include "fs/fdt.h"
 #include "common/string.h"
-#include "core/mm.h"
-#include "core/simple_alloc.h"
 #include "drivers/uart.h"
+#include "mm/mm.h"
+#include "mm/simple_alloc.h"
 
 static fdt_header *header;
 static char *dt_strings;

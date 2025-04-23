@@ -9,11 +9,11 @@
  *   https://people.eecs.berkeley.edu/~kubitron/courses/cs194-24-S13/hand-outs/bonwick_slab.pdf
  */
 
-#include "core/slab.h"
+#include "mm/slab.h"
 #include "common/list.h"
 #include "common/printf.h"
 #include "common/types.h"
-#include "core/mm.h"
+#include "mm/mm.h"
 
 static const uint32_t kmem_size_classes[] = {16,  32,   64,   128,  256,
                                              512, 1024, 2048, 4096, 8192};

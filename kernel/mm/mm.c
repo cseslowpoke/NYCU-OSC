@@ -12,11 +12,13 @@
  */
 // clang-format on
 
-#include "core/mm.h"
+// #define MM_DEBUG
+
+#include "mm/mm.h"
 #include "common/list.h"
 #include "common/printf.h"
 #include "common/types.h"
-#include "core/simple_alloc.h"
+#include "mm/simple_alloc.h"
 
 static list_head_t free_list[MAX_ORDER + 1];
 
@@ -80,17 +82,23 @@ void mm_init() {
       for (int k = 0; k <= MAX_ORDER; k++) {
         page_t *buddy = &page_meta[block->id ^ (1 << k)];
         if (buddy->used == 1) {
+#ifdef MM_DEBUG
           printf("[mm][+] buddy id: 0x%x, order: %d\r\n", block->id, k);
+#endif
           list_add(&block->list, &free_list[k]);
           block->order = k;
           break;
         }
         if (buddy->order == k) {
+#ifdef MM_DEBUG
           printf("[mm][-] buddy id: 0x%x, order: %d\r\n", buddy->id, k);
+#endif
           list_del(&buddy->list);
           block = block->id < buddy->id ? block : buddy;
         } else {
+#ifdef MM_DEBUG
           printf("[mm][+] buddy id: 0x%x, order: %d\r\n", block->id, k);
+#endif
           list_add(&block->list, &free_list[k]);
           block->order = k;
           break;
@@ -126,7 +134,9 @@ void *mm_alloc(uint32_t size) {
   }
   page_t *block = list_entry(free_list[i].next, page_t, list);
   list_del(&block->list);
+#ifdef MM_DEBUG
   printf("[mm][-] buddy_id: 0x%x, order: %d\r\n", block->id, i);
+#endif
 
   for (int j = i; j > offer; j--) {
     // find buddy block
@@ -136,13 +146,17 @@ void *mm_alloc(uint32_t size) {
     buddy->order = j - 1;
     buddy->used = 0;
     list_add(&buddy->list, &free_list[j - 1]);
+#ifdef MM_DEBUG
     printf("[mm][+] buddy id: 0x%x, order: %d\r\n", buddy->id, j - 1);
+#endif
   }
   block->order = offer;
   block->used = 1;
+#ifdef MM_DEBUG
   printf("[mm][page] alloc: 0x%p, order: %d, id: %x\r\n",
          (void *)(uint64_t)(block->id * PAGE_SIZE + MM_ZONE_BEGIN),
          block->order, block->id);
+#endif
 
   return (void *)(uint64_t)(block->id * PAGE_SIZE + MM_ZONE_BEGIN);
 }
@@ -154,9 +168,11 @@ void mm_free(void *ptr) {
     return;
   }
   block->used = 0;
+#ifdef MM_DEBUG
   printf("[mm][page] free: 0x%p, order: %d, id: %x\r\n",
          (void *)(uint64_t)(block->id * PAGE_SIZE + MM_ZONE_BEGIN),
          block->order, block->id);
+#endif
 
   while (block->order < MAX_ORDER) {
     int buddy_id = block->id ^ (1 << block->order);
@@ -164,12 +180,16 @@ void mm_free(void *ptr) {
     if (buddy->used == 1) {
       break;
     }
+#ifdef MM_DEBUG
     printf("[mm][-] buddy id: 0x%x, order: %d\r\n", buddy->id, buddy->order);
+#endif
     list_del(&buddy->list);
     block = block->id < buddy->id ? block : buddy;
     block->order++;
   }
+#ifdef MM_DEBUG
   printf("[mm][+] buddy_id: 0x%x, order %d\r\n", block->id, block->order);
+#endif
   list_add(&block->list, &free_list[block->order]);
 }
 
@@ -186,4 +206,20 @@ void mm_reserve_region(uint64_t begin, uint64_t end) {
   reserved_regions[reserved_count].begin = begin;
   reserved_regions[reserved_count].end = end;
   reserved_count++;
+}
+
+void mm_print_freelist() {
+  for (int i = 0; i <= MAX_ORDER; i++) {
+    printf("[mm] free_list[%d]: ", i);
+    list_head_t *pos;
+    list_for_each(pos, &free_list[i]) {
+      page_t *block = list_entry(pos, page_t, list);
+      printf("0x%x ", block->id);
+      if (pos->next == &free_list[i]) {
+        break;
+      }
+      printf("-> ");
+    }
+    printf("\r\n");
+  }
 }

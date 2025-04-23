@@ -15,8 +15,9 @@ include common/Makefile
 include core/Makefile
 include drivers/Makefile
 include fs/Makefile
+include mm/Makefile
 
-SRC := $(SRC_ARCH) $(SRC_COMMON) $(SRC_CORE) $(SRC_DRIVERS) $(SRC_FS) main.c
+SRC := $(SRC_ARCH) $(SRC_COMMON) $(SRC_CORE) $(SRC_DRIVERS) $(SRC_FS) $(SRC_MM) main.c
 OBJS := $(patsubst %.c, $(BUILD_KERNEL)/%.o, $(filter %.c, $(SRC))) \
         $(patsubst %.s, $(BUILD_KERNEL)/%.o, $(filter %.s, $(SRC)))
 

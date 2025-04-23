@@ -3,7 +3,7 @@
 
 #include "common/list.h"
 #include "common/types.h"
-#include "core/slab.h"
+#include "mm/slab.h"
 
 #define MIN_ORDER 12
 #define MAX_ORDER 10
@@ -43,5 +43,7 @@ static reserved_region_t reserved_regions[MAX_RESERVED_REGIONS];
 static int reserved_count = 0;
 
 void mm_reserve_region(uint64_t begin, uint64_t end);
+
+void mm_print_freelist(void);
 
 #endif // __MM_H
