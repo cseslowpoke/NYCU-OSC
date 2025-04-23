@@ -3,7 +3,13 @@
 
 #include "common/types.h"
 
-void delay_cycles(int cycles);
+#define DELAY_CYCLES(cycles)                                                   \
+  do {                                                                         \
+    int _c = (cycles);                                                         \
+    while (_c-- > 0) {                                                         \
+      __asm__ volatile("nop");                                                 \
+    }                                                                          \
+  } while (0)
 
 /*
  * itoa_base - convert an integer to a string in a specified base.
