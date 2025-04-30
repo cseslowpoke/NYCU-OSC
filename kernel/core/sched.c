@@ -62,27 +62,39 @@ void sched_init() {
 }
 
 void sched() {
+  DISABLE_IRQ();
   if (list_empty(&task_list)) {
     return; // No tasks to schedule
   }
 
   task_struct_t *current = get_current();
   task_struct_t *next;
-  // do {
-  next = list_entry(task_list.next, task_struct_t, task_list);
-  list_del(&next->task_list);
-  // } while (next->state == TASK_ZOMBIE);
+  do {
+    if (list_empty(&task_list)) {
+      ENABLE_IRQ();
+      return; // No tasks to schedule
+    }
+    next = list_entry(task_list.next, task_struct_t, task_list);
+    list_del(&next->task_list);
+    if (next->state != TASK_ZOMBIE) {
+      break;
+    }
+    list_add_tail(&next->task_list, &zombie_list);
+  } while (1);
 
   if (current->state != TASK_ZOMBIE) {
     list_add_tail(&current->task_list, &task_list);
   } else {
     list_add_tail(&current->task_list, &zombie_list);
   }
+  ENABLE_IRQ();
   switch_to(current, next);
 }
 
 void sched_add(task_struct_t *task) {
+  DISABLE_IRQ();
   list_add(&task->task_list, &task_list);
+  ENABLE_IRQ();
   task->state = TASK_SLEEPING;
 }
 
@@ -99,6 +111,7 @@ void sched_kill_zombie() {
 void sched_idle() {
   while (1) {
     sched();
+    ENABLE_IRQ();
     sched_kill_zombie();
   }
 }
