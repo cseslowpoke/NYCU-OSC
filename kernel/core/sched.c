@@ -1,7 +1,10 @@
 #include "core/sched.h"
 #include "common/list.h"
+#include "common/printf.h"
 #include "common/utils.h"
 #include "core/task.h"
+#include "drivers/irq.h"
+#include "drivers/timer.h"
 #include "mm/slab.h"
 
 static list_head_t task_list;
@@ -33,6 +36,15 @@ __attribute__((naked)) void switch_to(task_struct_t *prev,
 
 extern char _stack_top[];
 
+void sched_time_slice() {
+  // printf("sched_time_slice\r\n");
+  timer_add_task((timer_handler_t)sched_time_slice, NULL,
+                 READ_SYSREG(CNTFRQ_EL0) >> 5);
+  // timer_add_task((timer_handler_t)sched_time_slice, NULL,
+  //                READ_SYSREG(CNTFRQ_EL0));
+  sched();
+}
+
 void sched_init() {
   INIT_LIST_HEAD(&task_list);
   INIT_LIST_HEAD(&zombie_list);
@@ -45,6 +57,8 @@ void sched_init() {
   current->stack = _stack_top;
   INIT_LIST_HEAD(&current->task_list);
   WRITE_SYSREG(TPIDR_EL1, current);
+  timer_add_task((timer_handler_t)sched_time_slice, NULL,
+                 READ_SYSREG(CNTFRQ_EL0) >> 5);
 }
 
 void sched() {
