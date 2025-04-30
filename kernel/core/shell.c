@@ -20,7 +20,7 @@ void shell_start() {
   printf("Welcome to rpi3b+\r\n");
   char buf[SHELL_BUFFER_SIZE] = {};
   int buf_len = 0;
-  printf("# ");
+  printf("> ");
   while (1) {
     char c = uart_recv();
     if (c == '\r' || c == '\n') {
@@ -28,7 +28,7 @@ void shell_start() {
       buf[buf_len] = '\0';
       shell_process_command(buf, buf_len);
       buf_len = 0;
-      printf("# ");
+      printf("> ");
     } else if (c == '\b' || c == 127) {
       if (buf_len > 0) {
         buf_len--;
