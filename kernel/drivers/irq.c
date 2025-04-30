@@ -1,6 +1,7 @@
 #include "drivers/irq.h"
 #include "common/list.h"
 #include "common/utils.h"
+#include "core/task.h"
 #include "drivers/timer.h"
 
 static irq_hadler_t irq_table[MAX_IRQ];
@@ -10,7 +11,7 @@ static irq_task_t irq_task_memory_pool[IRQ_TASK_MEMORY_POOL_SIZE];
 static list_head_t irq_task_queue;
 
 static uint32_t irq_level;
-static uint32_t irq_current_priority;
+// static uint32_t irq_current_priority;
 
 void irq_init() {
   for (int i = 0; i < MAX_IRQ; i++) {
@@ -23,7 +24,7 @@ void irq_init() {
     list_add_tail(&irq_task_memory_pool[i].list, &irq_task_free_list);
   }
 
-  irq_current_priority = 0x3f3f3f3f;
+  // irq_current_priority = 0x3f3f3f3f;
 
   ENABLE_IRQ();
 }
@@ -127,14 +128,15 @@ irq_task_t *irq_task_peek() {
 
 void irq_task_exec() {
   irq_task_t *task = irq_task_peek();
+  task_struct_t *current = get_current();
   if (task == NULL) { // when no task in the queue
     return;
   }
-  int irq_pre_priority = irq_current_priority;
+  int irq_pre_priority = current->irq_priority;
   if (task->priority >= irq_pre_priority) {
     return;
   }
-  irq_current_priority = task->priority;
+  current->irq_priority = task->priority;
 
   while (1) {
     task = irq_task_peek();
@@ -153,5 +155,5 @@ void irq_task_exec() {
     DISABLE_IRQ();
     list_add_tail(&task->list, &irq_task_free_list);
   }
-  irq_current_priority = irq_pre_priority;
+  current->irq_priority = irq_pre_priority;
 }
