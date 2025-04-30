@@ -79,3 +79,20 @@ int atoi(const char *str) {
   }
   return ret;
 }
+
+void *memcpy(void *dest, const void *src, uint32_t size) {
+  char *d = (char *)dest;
+  const char *s = (const char *)src;
+  for (uint32_t i = 0; i < size; i++) {
+    d[i] = s[i];
+  }
+  return dest;
+}
+
+void *memset(void *dest, int c, uint32_t size) {
+  char *d = (char *)dest;
+  for (uint32_t i = 0; i < size; i++) {
+    d[i] = c;
+  }
+  return dest;
+}

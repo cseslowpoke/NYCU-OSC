@@ -72,4 +72,8 @@ int atoi(const char *str);
 #define container_of(ptr, type, member)                                        \
   ((type *)((char *)(ptr) - offsetof(type, member)))
 
+void *memcpy(void *dest, const void *src, uint32_t size);
+
+void *memset(void *dest, int c, uint32_t size);
+
 #endif // __UTILS_H
