@@ -45,11 +45,12 @@ void timer_add_task(timer_handler_t handler, void *arg, uint32_t time) {
   timer_task_t *task = (timer_task_t *)kmalloc(sizeof(timer_task_t));
   task->func = handler;
   task->arg = arg;
-  task->time = READ_SYSREG(CNTPCT_EL0) + time * READ_SYSREG(CNTFRQ_EL0);
+  task->time = READ_SYSREG(CNTPCT_EL0) + time;
 
   if (list_empty(&timer_tasks)) {
     list_add_tail(&task->list, &timer_tasks);
-    timer_set(time * READ_SYSREG(CNTFRQ_EL0));
+    // timer_set(time * READ_SYSREG(CNTFRQ_EL0));
+    timer_set(time);
     WRITE_SYSREG(CNTP_CTL_EL0, 1ll);
     return;
   }
@@ -60,7 +61,7 @@ void timer_add_task(timer_handler_t handler, void *arg, uint32_t time) {
     if (t->time > task->time) {
       list_add_tail(&task->list, pos);
       if (&task->list == timer_tasks.next) {
-        timer_set(time * READ_SYSREG(CNTFRQ_EL0));
+        timer_set(time);
         WRITE_SYSREG(CNTP_CTL_EL0, 1ll);
       }
       return;

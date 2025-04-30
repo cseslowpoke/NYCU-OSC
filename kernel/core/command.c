@@ -156,5 +156,6 @@ void cmd_set_timeout(unsigned int argc, const char *argv[]) {
   msg[strlen(argv[1]) + 1] = '\n';
   msg[strlen(argv[1]) + 2] = '\0';
 
-  timer_add_task((timer_handler_t)uart_send_string, (void *)msg, time);
+  timer_add_task((timer_handler_t)uart_send_string, (void *)msg,
+                 time * READ_SYSREG(CNTFRQ_EL0));
 }
