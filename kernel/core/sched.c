@@ -115,3 +115,14 @@ void sched_idle() {
     sched_kill_zombie();
   }
 }
+
+void sched_kill_task(uint32_t pid) {
+  list_head_t *pos;
+  list_for_each(pos, &task_list) {
+    task_struct_t *task = list_entry(pos, task_struct_t, task_list);
+    if (task->pid == pid) {
+      task->state = TASK_ZOMBIE;
+      return;
+    }
+  }
+}

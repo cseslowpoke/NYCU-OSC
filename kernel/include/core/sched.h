@@ -12,4 +12,6 @@ void sched_add(task_struct_t *task);
 
 void sched_idle(void);
 
+void sched_kill_task(uint32_t pid);
+
 #endif // __SCHED_H
