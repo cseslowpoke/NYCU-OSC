@@ -19,4 +19,5 @@ extern unsigned int mailbox[36] __attribute__((aligned(16)));
 
 int mailbox_call(char channel);
 
+int mailbox_call_with_mail(char ch, unsigned int *mbox);
 #endif // __MAILBOX_H
