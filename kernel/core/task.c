@@ -4,39 +4,55 @@
 #include "common/types.h"
 #include "common/utils.h"
 #include "core/sched.h"
+#include "core/shell.h"
 #include "mm/slab.h"
 
 static uint32_t next_pid = 1;
 
-task_struct_t *task_create_kernel(void (*fn)(void)) {
-  task_struct_t *task = kmalloc(sizeof(task_struct_t));
+static task_struct_t *task_init_common(task_struct_t *task,
+                                       enum task_type type) {
   task->pid = next_pid++;
   task->state = TASK_SLEEPING;
-  task->type = TASK_KERNEL;
+  task->type = type;
   task->stack = kmalloc(TASK_STACK_SIZE); // Allocate a stack of 4KB
-  task->context.sp =
-      (uint64_t)(task->stack + TASK_STACK_SIZE); // Set stack pointer
+  if (!task->stack) {
+    printf("Failed to allocate stack for task %d\n", task->pid);
+    return NULL;
+  }
+  task->context.sp = (uint64_t)(task->stack + TASK_STACK_SIZE);
   task->context.fp = (uint64_t)(task->stack + TASK_STACK_SIZE);
-  task->context.lr = (uint64_t)task_entry_wrapper; // Set link register
-  task->fn = fn;                    // Set the function to be executed
   task->irq_priority = 0x3f3f3f3f;  // Set the default IRQ priority
   INIT_LIST_HEAD(&task->task_list); // Initialize the task list
   return task;
 }
 
+task_struct_t *task_create_kernel(void (*fn)(void)) {
+  task_struct_t *task = kmalloc(sizeof(task_struct_t));
+  if (!task) {
+    printf("Failed to allocate task_struct\n");
+    return NULL;
+  }
+  if (!task_init_common(task, TASK_KERNEL)) {
+    kfree(task);
+    return NULL;
+  }
+  task->context.lr = (uint64_t)task_entry_wrapper; // Set link register
+  task->fn = fn; // Set the function to be executed
+  return task;
+}
+
 task_struct_t *task_create_user() {
   task_struct_t *task = kmalloc(sizeof(task_struct_t));
-  task->pid = next_pid++;
-  task->state = TASK_SLEEPING;
-  task->type = TASK_USER;
-  task->stack = kmalloc(TASK_STACK_SIZE); // Allocate a stack of 4KB
-  task->context.sp =
-      (uint64_t)(task->stack + TASK_STACK_SIZE); // Set stack pointer
-  task->context.fp = (uint64_t)(task->stack + TASK_STACK_SIZE);
+  if (!task) {
+    printf("Failed to allocate task_struct\n");
+    return NULL;
+  }
+  if (!task_init_common(task, TASK_USER)) {
+    kfree(task);
+    return NULL;
+  }
   task->context.lr = (uint64_t)task_return_el0;
   task->user_stack = kmalloc(TASK_STACK_SIZE); // Allocate a user stack
-  task->irq_priority = 0x3f3f3f3f;             // Set the default IRQ priority
-  INIT_LIST_HEAD(&task->task_list);            // Initialize the task list
   return task;
 }
 
@@ -81,9 +97,6 @@ void foo() {
     sched(); // Yield to the scheduler
   }
 }
-
-#include "core/shell.h"
-#include "core/user_exec.h"
 
 void task_test() {
   // for (int i = 0; i < 5; i++) {
