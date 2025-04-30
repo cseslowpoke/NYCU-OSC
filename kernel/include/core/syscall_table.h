@@ -1,0 +1,8 @@
+SYSCALL_DEF(0, getpid, int32_t, (void))
+SYSCALL_DEF(1, uart_read, uint32_t, (char[], uint32_t))
+SYSCALL_DEF(2, uart_write, uint32_t, (const char[], uint32_t))
+SYSCALL_DEF(3, exec, int32_t, (const char *, char *const[]))
+SYSCALL_DEF(4, fork, int32_t, (void))
+SYSCALL_DEF(5, exit, void, (int))
+SYSCALL_DEF(6, mbox_call, int32_t, (uint8_t, uint32_t *))
+SYSCALL_DEF(7, kill, void, (int))

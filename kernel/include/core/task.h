@@ -16,6 +16,13 @@ enum task_type {
   TASK_USER,
 };
 
+typedef struct trapframe {
+  uint64_t elr_el1;  // Exception Link Register
+  uint64_t spsr_el1; // Saved Program Status Register
+  uint64_t sp_el0;   // Stack Pointer for EL0
+  uint64_t gpr[31];  // General Purpose Registers
+} trapframe_t;
+
 typedef struct context {
   uint64_t x19;
   uint64_t x20;
