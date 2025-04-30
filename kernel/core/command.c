@@ -137,13 +137,7 @@ void cmd_exec(unsigned int argc, const char *argv[]) {
     printf("Usage: user_exec <filename>\r\n");
     return;
   }
-  char *buf;
-  int size = file_find(argv[1], &buf);
-  if (size == -1) {
-    printf("File not found: \r\n");
-    return;
-  }
-  user_exec(buf, size);
+  do_exec(argv[1], NULL);
 }
 
 void cmd_set_timeout(unsigned int argc, const char *argv[]) {

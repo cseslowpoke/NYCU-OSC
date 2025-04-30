@@ -38,11 +38,18 @@ typedef struct task_struct {
   enum task_state state;
   enum task_type type;
   void *stack;
+  void *user_stack;
   list_head_t task_list;
   void (*fn)(void);
+  trapframe_t *trapframe; // For user tasks
+  void *prog;
+  uint64_t prog_size;
+  uint32_t irq_priority;
 } task_struct_t;
 
 task_struct_t *task_create_kernel(void (*fn)(void));
+
+task_struct_t *task_create_user();
 
 void task_exit(task_struct_t *task);
 
@@ -56,6 +63,8 @@ void task_exit(task_struct_t *task);
 void task_set_current(task_struct_t *task);
 
 void task_entry_wrapper();
+
+void task_return_el0();
 
 void task_test();
 

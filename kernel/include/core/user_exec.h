@@ -10,4 +10,6 @@
 
 void user_exec(void *prog, uint32_t prog_len);
 
+int32_t do_exec(const char *filename, char *const argv[]);
+
 #endif
