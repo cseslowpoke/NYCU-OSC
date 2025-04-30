@@ -6,7 +6,9 @@ LD := ld.lld
 OBJCOPY := llvm-objcopy
 AS := clang
 
-CFLAGS := -mcpu=cortex-a53 --target=aarch64-rpi3-elf --sysroot=$(AARCH64) -Wall -nostdlib -ffreestanding -mgeneral-regs-only -g -Iinclude
+CFLAGS := -mcpu=cortex-a53 --target=aarch64-rpi3-elf \
+	--sysroot=$(AARCH64) -Wall -nostdlib -ffreestanding \
+	-mgeneral-regs-only -g -Iinclude 
 LDFLAGS := -T linker.ld
 OBJFLAGS = --output-target=aarch64-rpi3-elf -O binary
 

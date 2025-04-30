@@ -1,5 +1,7 @@
 #include "common/printf.h"
+#include "core/sched.h"
 #include "core/shell.h"
+#include "core/task.h"
 #include "drivers/irq.h"
 #include "drivers/timer.h"
 #include "drivers/uart.h"
@@ -24,6 +26,10 @@ int main(void *dtb_addr) {
   kmem_cache_init();
   timer_init();
 
-  shell_start();
+  sched_init();
+
+  task_test();
+
+  // shell_start();
   return 0;
 }

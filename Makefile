@@ -15,9 +15,11 @@ bootloader_gdb: all
 	@qemu-system-aarch64 -M raspi3b -kernel build/bootloader.img -display none -serial null -serial stdio -S -s -initrd initramfs.cpio -dtb bcm2710-rpi-3-b-plus.dtb
 
 run: all
-	@qemu-system-aarch64 -M raspi3b -kernel build/kernel.img -display none -serial null -serial stdio -initrd initramfs.cpio -dtb bcm2710-rpi-3-b-plus.dtb
+	# @qemu-system-aarch64 -M raspi3b -kernel build/kernel.img -display none -serial null -serial stdio -initrd initramfs.cpio -dtb bcm2710-rpi-3-b-plus.dtb
+	@qemu-system-aarch64 -M raspi3b -kernel build/kernel.img -serial null -serial stdio -initrd initramfs.cpio -dtb bcm2710-rpi-3-b-plus.dtb
 
 run_gdb: all
-	@qemu-system-aarch64 -M raspi3b -kernel build/kernel.img -display none -serial null -serial stdio -initrd initramfs.cpio -dtb bcm2710-rpi-3-b-plus.dtb -S -s
+	# @qemu-system-aarch64 -M raspi3b -kernel build/kernel.img -display none -serial null -serial stdio -initrd initramfs.cpio -dtb bcm2710-rpi-3-b-plus.dtb -S -s
+	@qemu-system-aarch64 -M raspi3b -kernel build/kernel.img -serial null -serial stdio -initrd initramfs.cpio -dtb bcm2710-rpi-3-b-plus.dtb -S -s
 	
 .PHONY: all clean bootloader bootloader_gdb run run_gdb

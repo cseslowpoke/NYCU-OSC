@@ -1,10 +1,12 @@
 #include "core/task.h"
 #include "common/list.h"
+#include "common/printf.h"
 #include "common/types.h"
 #include "common/utils.h"
+#include "core/sched.h"
 #include "mm/slab.h"
 
-static uint64_t next_pid = 1;
+static uint32_t next_pid = 1;
 
 task_struct_t *task_create_kernel(void (*fn)(void)) {
   task_struct_t *task = kmalloc(sizeof(task_struct_t));
@@ -75,20 +77,22 @@ void foo() {
   for (int i = 0; i < 10; i++) {
     task_struct_t *task = get_current();
     printf("Task %d: %d\r\n", task->pid, i);
-    // DELAY_CYCLES(1000000);
+    DELAY_CYCLES(1000000);
     sched(); // Yield to the scheduler
   }
 }
 
 #include "core/shell.h"
+#include "core/user_exec.h"
 
 void task_test() {
-  for (int i = 0; i < 5; i++) {
-    task_struct_t *task = task_create_kernel(foo);
-    sched_add(task);
-  }
-  // task_struct_t *task = task_create_kernel(shell_start);
-  // sched_add(task);
+  // for (int i = 0; i < 5; i++) {
+  //   task_struct_t *task = task_create_kernel(foo);
+  //   sched_add(task);
+  // }
+  task_struct_t *task = task_create_kernel(shell_start);
+  sched_add(task);
+  // do_exec("fork.img", NULL);
 
   sched_idle();
 }
