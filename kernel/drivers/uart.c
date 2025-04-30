@@ -69,10 +69,15 @@ void uart_send_string(const char *str) {
   }
 }
 
-void uart_recv_bytes(unsigned char *buf, unsigned int size) {
-  for (int i = 0; i < size; i++) {
+uint32_t uart_recv_bytes(unsigned char *buf, unsigned int size) {
+  int i = 0;
+  for (; i < size; i++) {
+    if (uart_rx_head == uart_rx_tail) {
+      break;
+    }
     buf[i] = uart_recv();
   }
+  return i;
 }
 
 // top-half uart interrupt handler

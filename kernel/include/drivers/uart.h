@@ -30,7 +30,7 @@ char uart_recv();
 
 void uart_send_string(const char *str);
 
-void uart_recv_bytes(unsigned char *buf, unsigned int size);
+uint32_t uart_recv_bytes(unsigned char *buf, unsigned int size);
 
 void uart_irq_handler();
 
