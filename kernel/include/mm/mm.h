@@ -5,6 +5,8 @@
 #include "common/types.h"
 #include "mm/slab.h"
 
+// #define MM_DEBUG
+
 #define MIN_ORDER 12
 #define MAX_ORDER 10
 #define PAGE_SIZE 0x1000

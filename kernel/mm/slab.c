@@ -111,8 +111,10 @@ void *kmem_cache_alloc(uint32_t class) {
 
   void *ptr = slab->free_list.next;
   list_del(slab->free_list.next);
+#ifdef MM_DEBUG
   printf("[slab] alloc: 0x%p, chuck size: %d\r\n", ptr,
          kmem_size_classes[class]);
+#endif
   return ptr;
 }
 
@@ -124,8 +126,10 @@ void kmem_cache_free(void *ptr) {
   kmem_slab_t *slab = (kmem_slab_t *)page->slab;
   INIT_LIST_HEAD((list_head_t *)ptr);
   list_add((list_head_t *)ptr, &slab->free_list);
+#ifdef MM_DEBUG
   printf("[slab] free: 0x%p, chuck size: %d\r\n", ptr,
          kmem_size_classes[slab->class]);
+#endif
 
   // check if slab is full
   if (slab->inuse == slab->total) {

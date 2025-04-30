@@ -12,8 +12,6 @@
  */
 // clang-format on
 
-// #define MM_DEBUG
-
 #include "mm/mm.h"
 #include "common/list.h"
 #include "common/printf.h"
