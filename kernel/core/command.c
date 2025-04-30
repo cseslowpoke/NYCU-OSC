@@ -2,7 +2,7 @@
 #include "common/string.h"
 #include "common/types.h"
 #include "common/utils.h"
-#include "core/user_exec.h"
+#include "core/exec.h"
 #include "drivers/mailbox.h"
 #include "drivers/mbox_tags.h"
 #include "drivers/timer.h"
