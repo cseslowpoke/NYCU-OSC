@@ -28,6 +28,7 @@ static task_struct_t *task_init_common(task_struct_t *task,
 
 task_struct_t *task_create_kernel(void (*fn)(void)) {
   task_struct_t *task = kmalloc(sizeof(task_struct_t));
+  memset(task, 0, sizeof(task_struct_t)); // Clear the task structure
   if (!task) {
     printf("Failed to allocate task_struct\n");
     return NULL;
@@ -43,6 +44,7 @@ task_struct_t *task_create_kernel(void (*fn)(void)) {
 
 task_struct_t *task_create_user() {
   task_struct_t *task = kmalloc(sizeof(task_struct_t));
+  memset(task, 0, sizeof(task_struct_t)); // Clear the task structure
   if (!task) {
     printf("Failed to allocate task_struct\n");
     return NULL;
@@ -59,6 +61,15 @@ task_struct_t *task_create_user() {
 void task_exit(task_struct_t *task) {
   task->state = TASK_ZOMBIE; // Mark the task as a zombie
   sched();
+}
+
+void task_destory(task_struct_t *task) {
+  if (task->type == TASK_USER) {
+    kfree(task->user_stack); // Free the user stack
+    kfree(task->prog);       // Free the program memory
+  }
+  kfree(task->stack); // Free the kernel stack
+  kfree(task);        // Free the task structure
 }
 
 void task_entry_wrapper() {

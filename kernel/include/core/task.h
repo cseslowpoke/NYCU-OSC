@@ -60,6 +60,8 @@ task_struct_t *task_create_user();
 
 void task_exit(task_struct_t *task);
 
+void task_destory(task_struct_t *task);
+
 #define get_current()                                                          \
   ({                                                                           \
     uint64_t tpidr_el1;                                                        \
