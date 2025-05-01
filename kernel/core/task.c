@@ -78,26 +78,32 @@ void task_entry_wrapper() {
   task_exit(task); // Destroy the task
 }
 
-void task_return_el0() {
-  // TODO: implement this
-  task_struct_t *task = get_current();
-  asm volatile("mov x0, %0\n\t"
-               "msr sp_el0, x0\n\t"
-               :
-               : "r"(task->trapframe->sp_el0));
-  asm volatile("mov x0, %0\n\t"
-               "msr elr_el1, x0\n\t"
-               :
-               : "r"(task->trapframe->elr_el1));
-  // asm volatile("mov x0, #0x340\n\t"
-  //              "msr spsr_el1, x0\n\t");
-  asm volatile("mov x0, %0\n\t"
-               "msr spsr_el1, x0\n\t"
-               :
-               : "r"(task->trapframe->spsr_el1));
-  asm volatile("eret");
-  while (1)
-    ; // Should never reach here
+__attribute__((naked)) void task_return_el0() {
+  __asm__ volatile("ldr x0, [sp, #0]\n\t"
+                   "msr elr_el1, x0\n\t" // set elr_el1 to return value
+                   "ldr x0, [sp, #8]\n\t"
+                   "msr spsr_el1, x0\n\t" // set spsr_el1 to return value
+                   "ldr x0, [sp, #16]\n\t"
+                   "msr sp_el0, x0\n\t" // set sp_el0 to return value
+                   "ldp x0, x1, [sp, #24]\n\t"
+                   "ldp x2, x3, [sp, #(3 * 8) + 16 * 1]\n\t"
+                   "ldp x4, x5, [sp, #(3 * 8) + 16 * 2]\n\t"
+                   "ldp x6, x7, [sp, #(3 * 8) + 16 * 3]\n\t"
+                   "ldp x8, x9, [sp, #(3 * 8) + 16 * 4]\n\t"
+                   "ldp x10, x11, [sp, #(3 * 8) + 16 * 5]\n\t"
+                   "ldp x12, x13, [sp, #(3 * 8) + 16 * 6]\n\t"
+                   "ldp x14, x15, [sp, #(3 * 8) + 16 * 7]\n\t"
+                   "ldp x16, x17, [sp, #(3 * 8) + 16 * 8]\n\t"
+                   "ldp x18, x19, [sp, #(3 * 8) + 16 * 9]\n\t"
+                   "ldp x20, x21, [sp, #(3 * 8) + 16 * 10]\n\t"
+                   "ldp x22, x23, [sp, #(3 * 8) + 16 * 11]\n\t"
+                   "ldp x24, x25, [sp, #(3 * 8) + 16 * 12]\n\t"
+                   "ldp x26, x27, [sp, #(3 * 8) + 16 * 13]\n\t"
+                   "ldp x28, x29, [sp, #(3 * 8) + 16 * 14]\n\t"
+                   "ldr x30, [sp, #(3 * 8) + 16 * 15]\n\t"
+
+                   "add sp, sp, 34 * 8\n\t" // pop 16 * 8 = 128 bytes
+                   "eret\n\t");
 }
 
 void foo() {
