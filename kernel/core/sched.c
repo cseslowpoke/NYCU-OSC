@@ -92,6 +92,9 @@ void sched() {
   }
   ENABLE_IRQ();
   switch_to(current, next);
+  if (current->type == TASK_USER) {
+    signal_handler();
+  }
 }
 
 void sched_add(task_struct_t *task) {
@@ -132,4 +135,19 @@ void sched_kill_task(uint32_t pid) {
       return;
     }
   }
+}
+
+task_struct_t *sched_get_task_by_pid(uint32_t pid) {
+  task_struct_t *current = get_current();
+  if (current->pid == pid) {
+    return current;
+  }
+  list_head_t *pos;
+  list_for_each(pos, &task_list) {
+    task_struct_t *task = list_entry(pos, task_struct_t, task_list);
+    if (task->pid == pid) {
+      return task;
+    }
+  }
+  return NULL;
 }

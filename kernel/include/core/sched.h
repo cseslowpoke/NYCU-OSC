@@ -15,4 +15,6 @@ void sched_idle(void);
 void sched_kill_task(uint32_t pid);
 
 void switch_to(task_struct_t *prev, task_struct_t *next);
+
+task_struct_t *sched_get_task_by_pid(uint32_t pid);
 #endif // __SCHED_H

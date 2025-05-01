@@ -2,6 +2,7 @@
 #define __TASK_H
 
 #include "common/list.h"
+#include "core/signal.h"
 
 #define TASK_STACK_SIZE 4096
 
@@ -40,18 +41,22 @@ typedef struct context {
 } context_t;
 
 typedef struct task_struct {
+  // kernel space
   context_t context;
   int pid;
   enum task_state state;
   enum task_type type;
   void *stack;
-  void *user_stack;
   list_head_t task_list;
   void (*fn)(void);
+  uint32_t irq_priority;
+
+  // user space
+  void *user_stack;
   trapframe_t *trapframe; // For user tasks
   void *prog;
   uint64_t prog_size;
-  uint32_t irq_priority;
+  signal_info_t signal;
 } task_struct_t;
 
 task_struct_t *task_create_kernel(void (*fn)(void));
