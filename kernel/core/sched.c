@@ -82,8 +82,11 @@ void sched() {
     list_add_tail(&next->task_list, &zombie_list);
   } while (1);
 
+  next->state = TASK_RUNNING;
+
   if (current->state != TASK_ZOMBIE) {
     list_add_tail(&current->task_list, &task_list);
+    current->state = TASK_SLEEPING;
   } else {
     list_add_tail(&current->task_list, &zombie_list);
   }
