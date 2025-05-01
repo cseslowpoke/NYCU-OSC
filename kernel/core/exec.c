@@ -77,6 +77,7 @@ int32_t do_exec(const char *filename, char *const argv[]) {
   task->trapframe = trapframe;
   task->context.sp = (uint64_t)task->trapframe;
   task->context.lr = (uint64_t)task_return_el0;
+  task->irq_priority = 0x3f3f3f3f;
 
   memset(trapframe, 0, sizeof(trapframe_t));
   trapframe->elr_el1 = (uint64_t)task->prog;
