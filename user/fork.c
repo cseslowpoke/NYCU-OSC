@@ -29,10 +29,8 @@ __attribute__((section(".start"))) void fork_test() {
       ++cnt;
       // }
     }
-    exit();
   } else {
     printf("parent here, pid %d, child %d\r\n", get_pid(), ret);
-    exit();
   }
   exit();
 }
