@@ -4,6 +4,7 @@
 #include "core/exec.h"
 #include "core/fork.h"
 #include "core/sched.h"
+#include "core/signal.h"
 #include "core/task.h"
 #include "drivers/irq.h"
 #include "drivers/mailbox.h"
@@ -14,7 +15,7 @@ typedef uint64_t (*syscall_handler_t)(uint64_t, uint64_t, uint64_t, uint64_t,
                                       uint64_t, uint64_t);
 #define SYSCALL_DEF(num, name, ret_type, args) [num] = (void *)sys_##name,
 
-syscall_handler_t syscall_table[] = {
+static syscall_handler_t syscall_table[] = {
 #include "core/syscall_table.h"
 };
 
@@ -22,7 +23,7 @@ syscall_handler_t syscall_table[] = {
 
 int32_t syscall_handler(trapframe_t *tf) {
   uint64_t syscall_num = tf->gpr[8]; // x8
-  if (syscall_num >= SYSCALL_MAX) {
+  if (syscall_num > SYSCALL_MAX) {
     return -1;
   }
   syscall_handler_t syscall_fn = syscall_table[syscall_num];
@@ -72,7 +73,7 @@ int32_t sys_mbox_call(uint8_t ch, uint32_t *mbox) {
   return mailbox_call_with_mail(ch, mbox);
 }
 
-void sys_kill(int pid) {
+void sys_pkill(int pid) {
   task_struct_t *current = get_current();
   if (pid == current->pid) {
     current->state = TASK_ZOMBIE;
@@ -81,3 +82,11 @@ void sys_kill(int pid) {
     sched_kill_task(pid);
   }
 }
+
+void sys_signal(int signum, sig_handler_t handler) {
+  signal_register(signum, handler);
+}
+
+void sys_kill(int pid, int signum) { signal_send(pid, signum); }
+
+void sys_sigreturn() { signal_return(); }

@@ -8,7 +8,7 @@
 #include "common/types.h"
 #include "core/task.h"
 
-#define SYSCALL_MAX 8
+#define SYSCALL_MAX 10
 
 #define SYSCALL_DEF(num, name, ret_type, args) ret_type sys_##name args;
 
