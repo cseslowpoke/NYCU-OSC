@@ -4,7 +4,7 @@
 #include "core/task.h"
 #include "mm/slab.h"
 
-__attribute__((naked)) void return_from_fork() {
+static __attribute__((naked)) void return_from_fork() {
   __asm__ volatile("ldr x0, [sp, #0]\n\t"
                    "msr elr_el1, x0\n\t" // set elr_el1 to return value
                    "ldr x0, [sp, #8]\n\t"
@@ -69,13 +69,19 @@ int32_t do_fork() {
   child->trapframe->gpr[29] = current->trapframe->gpr[29] -
                               (uint64_t)current->user_stack +
                               (uint64_t)child->user_stack;
-  child->trapframe->gpr[30] = current->trapframe->gpr[30] -
-                              (uint64_t)current->prog + (uint64_t)child->prog;
   child->trapframe->sp_el0 = current->trapframe->sp_el0 -
                              (uint64_t)current->user_stack +
                              (uint64_t)child->user_stack;
-  child->trapframe->elr_el1 = current->trapframe->elr_el1 -
-                              (uint64_t)current->prog + (uint64_t)child->prog;
+
+  // NOTE: For now, we using same code with parent.
+  child->trapframe->gpr[30] = current->trapframe->gpr[30];
+  child->trapframe->elr_el1 = current->trapframe->elr_el1;
+  // child->trapframe->gpr[30] = current->trapframe->gpr[30] -
+  //                             (uint64_t)current->prog +
+  //                             (uint64_t)child->prog;
+  // child->trapframe->elr_el1 = current->trapframe->elr_el1 -
+  //                             (uint64_t)current->prog +
+  //                             (uint64_t)child->prog;
 
   // Set up context for the child
   child->context.sp = (uint64_t)child->trapframe;
