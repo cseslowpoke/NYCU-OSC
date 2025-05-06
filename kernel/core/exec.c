@@ -93,7 +93,10 @@ int32_t do_exec(const char *filename, char *const argv[]) {
   //   }
   // }
 
-  // 7. return to user space
+  // 7. reset signal
+  memset(task->signal.handler, 0, sizeof(task->signal.handler));
+
+  // 8. return to user space
   static task_struct_t dummy;
   switch_to(&dummy, task);
 

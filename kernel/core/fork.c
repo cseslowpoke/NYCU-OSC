@@ -4,6 +4,8 @@
 #include "core/task.h"
 #include "mm/slab.h"
 
+struct signal_info_t;
+
 int32_t do_fork() {
   task_struct_t *current = get_current();
   if (!current) {
@@ -59,6 +61,10 @@ int32_t do_fork() {
   child->context.sp = (uint64_t)child->trapframe;
   child->context.fp = (uint64_t)child->trapframe;
   child->context.lr = (uint64_t)task_return_el0;
+
+  // copy parent signal to child
+  memcpy(&child->signal, &current->signal,
+         sizeof(signal_info_t)); // copy signal struct
 
   // Add child to the scheduler
   sched_add(child);
