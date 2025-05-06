@@ -127,6 +127,7 @@ _el1_lower_el_aarch64_sync:
 _el1_lower_el_aarch64_irq:
   msr daifset, #0xf
   save_all
+  mov x0, sp
   bl _el1_lower_el_aarch64_irq_handler
   load_all
   eret
