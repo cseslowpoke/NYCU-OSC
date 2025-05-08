@@ -16,10 +16,10 @@ void cpio_init() {
     uart_send_string("Cannot find chosen node in dtb\n");
     return;
   }
-  uint32_t *base_addr = (uint32_t *)(uint64_t)device_ptr(
-      *(uint32_t *)dtb_find_property(chosen_node, "linux,initrd-start"));
-  uint32_t *end_addr = (uint32_t *)(uint64_t)device_ptr(
-      *(uint32_t *)dtb_find_property(chosen_node, "linux,initrd-end"));
+  uint32_t *base_addr = (uint32_t *)((uint64_t)device_ptr(
+      *(uint32_t *)dtb_find_property(chosen_node, "linux,initrd-start")) + VM_BASE);
+  uint32_t *end_addr = (uint32_t *)((uint64_t)device_ptr(
+      *(uint32_t *)dtb_find_property(chosen_node, "linux,initrd-end")) + VM_BASE);
 
   mm_reserve_region((uint64_t)base_addr, (uint64_t)end_addr);
 

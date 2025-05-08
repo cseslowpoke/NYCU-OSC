@@ -1,8 +1,9 @@
 #ifndef __MAILBOX_H
 #define __MAILBOX_H
 
-#define MMIO_BASE 0x3f000000
-#define MAILBOX_BASE MMIO_BASE + 0xb880
+#include "common/utils.h"
+
+#define MAILBOX_BASE (MMIO_BASE + 0xb880)
 
 #define MAILBOX_READ ((volatile unsigned int *)(MAILBOX_BASE + 0x00))
 #define MAILBOX_STATUS ((volatile unsigned int *)(MAILBOX_BASE + 0x18))

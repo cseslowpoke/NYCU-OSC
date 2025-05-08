@@ -3,6 +3,7 @@
 #include "drivers/uart.h"
 #include "mm/mm.h"
 #include "mm/simple_alloc.h"
+#include "common/utils.h"
 
 static fdt_header *header;
 static char *dt_strings;
@@ -77,7 +78,8 @@ dtb_node_t *parse_fdt_struct() {
 }
 
 void fdt_init(void *fdt_base_address) {
-  header = (fdt_header *)fdt_base_address;
+  fdt_base_address = fdt_base_address + VM_BASE;
+  header = (fdt_header *)fdt_base_address ;
   if (header->magic != 0xedfe0dd0) {
     uart_send_string("Invalid FDT magic number\r\n");
     return;

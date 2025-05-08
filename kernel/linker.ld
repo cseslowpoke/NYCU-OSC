@@ -1,6 +1,7 @@
 SECTIONS
 {
-  . = 0x80000;
+  . = 0xffff000000000000;
+  . += 0x80000;
   __kernel_start = .;
   .text.boot : { KEEP(*(.text.boot)) }
   .text.exception : {KEEP(*(.text.exception))}
@@ -23,6 +24,8 @@ SECTIONS
   . = ALIGN(16); /* stack should aligned 0x10 */
   _stack_top = . + 0x80000; /* 512 KB stack */
   __kernel_end = . + 0x80000;
-  __simple_alloc_start = 0x10000000;
-  __simple_alloc_end =   0x20000000;
+  /* __simple_alloc_start = 0x10000000; */
+  /* __simple_alloc_end =   0x20000000; */
+  __simple_alloc_start = 0xffff000000000000 + 0x10000000;
+  __simple_alloc_end =   0xffff000000000000 +  0x20000000;
 }

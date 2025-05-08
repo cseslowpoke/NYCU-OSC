@@ -3,6 +3,9 @@
 
 #include "common/types.h"
 
+#define VM_BASE 0xffff000000000000ull
+#define MMIO_BASE (VM_BASE + 0x3f000000)
+
 #define DELAY_CYCLES(cycles)                                                   \
   do {                                                                         \
     int _c = (cycles);                                                         \

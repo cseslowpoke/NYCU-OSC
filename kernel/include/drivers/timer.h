@@ -3,8 +3,9 @@
 
 #include "common/list.h"
 #include "common/types.h"
+#include "common/utils.h"
 
-#define CORE0_TIMER_IRQ_CTRL ((volatile uint32_t *)0x40000040)
+#define CORE0_TIMER_IRQ_CTRL ((volatile uint32_t *)(VM_BASE + 0x40000040))
 
 typedef void (*timer_handler_t)(void *);
 

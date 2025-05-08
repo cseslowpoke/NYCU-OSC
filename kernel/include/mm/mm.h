@@ -4,6 +4,7 @@
 #include "common/list.h"
 #include "common/types.h"
 #include "mm/slab.h"
+#include "common/utils.h"
 
 // #define MM_DEBUG
 
@@ -11,8 +12,8 @@
 #define MAX_ORDER 10
 #define PAGE_SIZE 0x1000
 
-#define MM_ZONE_BEGIN 0x0
-#define MM_ZONE_END 0x3C000000
+#define MM_ZONE_BEGIN (VM_BASE + 0x0)
+#define MM_ZONE_END (VM_BASE + 0x3C000000)
 
 typedef struct page {
   struct list_head list; // List head for free pages

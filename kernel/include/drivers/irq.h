@@ -3,9 +3,10 @@
 
 #include "common/list.h"
 #include "common/types.h"
+#include "common/utils.h"
 
 #define MAX_IRQ 64
-#define IRQ_BASE_REG 0x3F00B000
+#define IRQ_BASE_REG (MMIO_BASE + 0xB000)
 #define IRQ_PENDINGB_REG ((volatile uint32_t *)(IRQ_BASE_REG + 0x200))
 #define IRQ_PENDING1_REG ((volatile uint32_t *)(IRQ_BASE_REG + 0x204))
 #define IRQ_PENDING2_REG ((volatile uint32_t *)(IRQ_BASE_REG + 0x208))
