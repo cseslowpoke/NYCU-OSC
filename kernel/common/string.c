@@ -14,7 +14,7 @@ char *strtok(char *str, const char delim) {
   static char *s2 = NULL;
   if (str != NULL) {
     strip(&str, delim);
-    s1 = NULL;
+    s1 = str;
     s2 = str;
     for (; *str != '\0'; str++) {
       if (*str == delim) {
