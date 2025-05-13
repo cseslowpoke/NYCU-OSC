@@ -4,7 +4,8 @@
 #include "common/list.h"
 #include "core/signal.h"
 
-#define TASK_STACK_SIZE 4096
+#define KERNEL_STACK_SIZE 4096
+#define USER_STACK_SIZE 16384
 
 enum task_state {
   TASK_RUNNING,
@@ -57,6 +58,11 @@ typedef struct task_struct {
   void *prog;
   uint64_t prog_size;
   signal_info_t signal;
+
+  // virtual memory support
+  uint64_t *pgd; // Page Global Directory
+  
+  // test
 } task_struct_t;
 
 task_struct_t *task_create_kernel(void (*fn)(void));

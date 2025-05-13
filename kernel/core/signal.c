@@ -38,14 +38,15 @@ __attribute__((naked)) void __sigreturn_trampoline() {
 void signal_invoke_handler(task_struct_t *task, sig_handler_t handler) {
 
   // allocate a new stack for the signal handler
-  task->signal.stack = kmalloc(TASK_STACK_SIZE);
+  task->signal.stack = kmalloc(USER_STACK_SIZE);
   if (!task->signal.stack) {
     printf("Failed to allocate memory for signal stack\n");
     return; // Handle memory allocation failure
   }
   // save the current trapframe to the signal stack
-  trapframe_t *sig_tf = (trapframe_t *)((uint8_t *)task->signal.stack +
-                                        TASK_STACK_SIZE - sizeof(trapframe_t));
+  trapframe_t *sig_tf =
+      (trapframe_t *)((uint8_t *)task->signal.stack + KERNEL_STACK_SIZE -
+                      sizeof(trapframe_t));
   memcpy(sig_tf, task->trapframe,
          sizeof(trapframe_t)); // Copy the current trapframe to the new stack
 

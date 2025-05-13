@@ -14,13 +14,13 @@ static task_struct_t *task_init_common(task_struct_t *task,
   task->pid = next_pid++;
   task->state = TASK_SLEEPING;
   task->type = type;
-  task->stack = kmalloc(TASK_STACK_SIZE); // Allocate a stack of 4KB
+  task->stack = kmalloc(KERNEL_STACK_SIZE); // Allocate a stack of 4KB
   if (!task->stack) {
     printf("Failed to allocate stack for task %d\n", task->pid);
     return NULL;
   }
-  task->context.sp = (uint64_t)(task->stack + TASK_STACK_SIZE);
-  task->context.fp = (uint64_t)(task->stack + TASK_STACK_SIZE);
+  task->context.sp = (uint64_t)(task->stack + KERNEL_STACK_SIZE);
+  task->context.fp = (uint64_t)(task->stack + KERNEL_STACK_SIZE);
   task->irq_priority = 0x3f3f3f3f;  // Set the default IRQ priority
   INIT_LIST_HEAD(&task->task_list); // Initialize the task list
   return task;
@@ -54,7 +54,7 @@ task_struct_t *task_create_user() {
     return NULL;
   }
   task->context.lr = (uint64_t)task_return_el0;
-  task->user_stack = kmalloc(TASK_STACK_SIZE); // Allocate a user stack
+  task->user_stack = kmalloc(KERNEL_STACK_SIZE); // Allocate a user stack
   return task;
 }
 
