@@ -40,4 +40,13 @@
 // Device Memory [0x3f000000, 0x80000000)
 void mmu_init_kernel();
 
+uint64_t *mmu_walk(uint64_t *pg_t, uint64_t va, uint64_t alloc);
+
+int mmu_map(uint64_t *pg_t, uint64_t va, uint64_t pa, uint64_t size,
+            uint64_t attr);
+
+uint64_t *mmu_create_pg();
+
+void mmu_switch_to(uint64_t *pgd);
+
 #endif
