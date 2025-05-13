@@ -5,6 +5,7 @@
 #include "core/sched.h"
 #include "core/task.h"
 #include "fs/file.h"
+#include "mm/mmu.h"
 #include "mm/slab.h"
 
 void user_exec(void *prog, uint32_t prog_len) {
@@ -60,7 +61,7 @@ int32_t do_exec(const char *filename, char *const argv[]) {
   task->prog_size = prog_len;
   memcpy(task->prog, user_prog, prog_len);
 
-  task->user_stack = kmalloc(TASK_STACK_SIZE);
+  task->user_stack = kmalloc(USER_STACK_SIZE);
   if (!task->user_stack) {
     printf("Failed to allocate user stack\n");
     kfree(task->prog);
@@ -70,9 +71,9 @@ int32_t do_exec(const char *filename, char *const argv[]) {
   // 4. Reset the task type
   task->type = TASK_USER;
 
-  // 5. Set up the trapframe
+  // 5. Set up the task context
   trapframe_t *trapframe =
-      (trapframe_t *)((uint8_t *)task->stack + TASK_STACK_SIZE -
+      (trapframe_t *)((uint8_t *)task->stack + KERNEL_STACK_SIZE -
                       sizeof(trapframe_t));
   task->trapframe = trapframe;
   task->context.sp = (uint64_t)task->trapframe;
@@ -80,11 +81,26 @@ int32_t do_exec(const char *filename, char *const argv[]) {
   task->irq_priority = 0x3f3f3f3f;
 
   memset(trapframe, 0, sizeof(trapframe_t));
-  trapframe->elr_el1 = (uint64_t)task->prog;
-  trapframe->spsr_el1 = 0x340; // Set the SPSR to EL1h
-  trapframe->sp_el0 = (uint64_t)task->user_stack + TASK_STACK_SIZE;
+  trapframe->elr_el1 = 0;
+  trapframe->spsr_el1 = 0x340;        // Set the SPSR to EL1h
+  trapframe->sp_el0 = USER_STACK_END; // Set the stack pointer for EL0
 
-  // 6. Handle arguments (for now, we don't do anything with them)
+  // 6. setup page table
+  task->pgd = mmu_create_pg();
+  mmu_map(task->pgd, USER_SPACE_BEGIN, (uint64_t)virt_to_phy(task->prog),
+          prog_len, MAIR_NORMAL | AP_RW_EL0 | PD_ACCESS);
+  mmu_map(task->pgd, USER_STACK_BEGIN, (uint64_t)virt_to_phy(task->user_stack),
+          USER_STACK_END - USER_STACK_BEGIN,
+          MAIR_NORMAL | AP_RW_EL0 | PD_ACCESS);
+
+  // map peripheral memory
+  mmu_map(task->pgd, PERIPHERAL_BEGIN, PERIPHERAL_BEGIN,
+          PERIPHERAL_END - PERIPHERAL_BEGIN,
+          MAIR_DEVICE | AP_RW_EL0 | PD_ACCESS);
+
+  mmu_switch_to(task->pgd);
+
+  // 7. Handle arguments (for now, we don't do anything with them)
   // if (argv != NULL) {
   //   int argc = 0;
   //   while (argv[argc] != NULL) {
@@ -93,10 +109,10 @@ int32_t do_exec(const char *filename, char *const argv[]) {
   //   }
   // }
 
-  // 7. reset signal
+  // 8. reset signal
   memset(task->signal.handler, 0, sizeof(task->signal.handler));
 
-  // 8. return to user space
+  // 9. return to user space
   static task_struct_t dummy;
   switch_to(&dummy, task);
 
