@@ -16,13 +16,13 @@ _start:
   // isb
   mrs x0, mpidr_el1
   and x0, x0, #0xFF
-  cbz x0, clear_bss
+  cbz x0, map_identify
 
 non_primary_core:
   wfe
   b non_primary_core
 
-clear_bss:
+map_identify:
   ldr x0, =(0 << 14) | (2 << 30) | ((64 - 48) << 0) | ((64 - 48) << 16)
   msr tcr_el1, x0
   ldr x0, =(0 << 0) | (0x44 << 8)
@@ -46,6 +46,7 @@ clear_bss:
   mrs x2, sctlr_el1
   orr x2, x2, 1
   msr sctlr_el1, x2
+bss_begin:
   ldr x0, = _bss_begin
   ldr x1, = _bss_end
   mov x2, #0
