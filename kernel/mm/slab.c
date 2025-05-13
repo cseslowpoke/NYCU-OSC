@@ -13,6 +13,7 @@
 #include "common/list.h"
 #include "common/printf.h"
 #include "common/types.h"
+#include "drivers/irq.h"
 #include "mm/mm.h"
 
 static const uint32_t kmem_size_classes[] = {16,  32,   64,   128,  256,
@@ -153,6 +154,7 @@ void kmem_cache_free(void *ptr) {
 }
 
 void *kmalloc(uint32_t size) {
+  DISABLE_IRQ();
   // slab allocation
   for (uint32_t i = 0; i < KMEM_SIZE_CLASS; i++) {
     if (size <= kmem_size_classes[i]) {
@@ -163,10 +165,12 @@ void *kmalloc(uint32_t size) {
   void *ptr = mm_alloc(size);
   page_t *page = addr_to_page(ptr);
   page->slab = NULL;
+  ENABLE_IRQ();
   return ptr;
 }
 
 void kfree(void *ptr) {
+  DISABLE_IRQ();
   page_t *page = addr_to_page(ptr);
   if (page->slab == NULL) {
     // handle for bigger memory free
@@ -175,4 +179,5 @@ void kfree(void *ptr) {
     // slab free
     kmem_cache_free(ptr);
   }
+  DISABLE_IRQ();
 }
