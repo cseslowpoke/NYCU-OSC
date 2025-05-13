@@ -1,8 +1,11 @@
 #include "core/fork.h"
 #include "common/types.h"
+#include "core/exec.h"
 #include "core/sched.h"
 #include "core/task.h"
+#include "mm/mmu.h"
 #include "mm/slab.h"
+#include "core/syscall.h"
 
 struct signal_info_t;
 
@@ -31,31 +34,24 @@ int32_t do_fork() {
   memcpy(child->prog, current->prog, current->prog_size);
 
   // copy current stack to child
-  memcpy(child->user_stack, current->user_stack, TASK_STACK_SIZE);
+  memcpy(child->user_stack, current->user_stack, USER_STACK_SIZE);
 
   child->state = TASK_SLEEPING;
-  child->trapframe = child->stack + TASK_STACK_SIZE -
+  child->trapframe = child->stack + KERNEL_STACK_SIZE -
                      sizeof(trapframe_t); // set trapframe to child stack
   memcpy(child->trapframe, current->trapframe, sizeof(trapframe_t));
 
-  // Set up trapframe for the child
-  child->trapframe->gpr[0] = 0; // child process return 0
-  child->trapframe->gpr[29] = current->trapframe->gpr[29] -
-                              (uint64_t)current->user_stack +
-                              (uint64_t)child->user_stack;
-  child->trapframe->sp_el0 = current->trapframe->sp_el0 -
-                             (uint64_t)current->user_stack +
-                             (uint64_t)child->user_stack;
+  child->trapframe->gpr[0] = 0;
 
-  // NOTE: For now, we using same code with parent.
-  child->trapframe->gpr[30] = current->trapframe->gpr[30];
-  child->trapframe->elr_el1 = current->trapframe->elr_el1;
-  // child->trapframe->gpr[30] = current->trapframe->gpr[30] -
-  //                             (uint64_t)current->prog +
-  //                             (uint64_t)child->prog;
-  // child->trapframe->elr_el1 = current->trapframe->elr_el1 -
-  //                             (uint64_t)current->prog +
-  //                             (uint64_t)child->prog;
+  child->pgd = mmu_create_pg();
+  mmu_map(child->pgd, USER_SPACE_BEGIN, (uint64_t)virt_to_phy(child->prog),
+          current->prog_size,  MAIR_NORMAL | PD_ACCESS | AP_RW_EL0);
+  mmu_map(child->pgd, USER_STACK_BEGIN, (uint64_t)virt_to_phy(child->user_stack),
+          USER_STACK_SIZE, MAIR_NORMAL | PD_ACCESS | AP_RW_EL0);
+
+  mmu_map(child->pgd, PERIPHERAL_BEGIN, PERIPHERAL_BEGIN,
+          PERIPHERAL_END - PERIPHERAL_BEGIN,
+          MAIR_DEVICE | AP_RW_EL0 | PD_ACCESS);
 
   // Set up context for the child
   child->context.sp = (uint64_t)child->trapframe;
