@@ -5,6 +5,7 @@
 #include "core/task.h"
 #include "drivers/irq.h"
 #include "drivers/timer.h"
+#include "mm/mmu.h"
 #include "mm/slab.h"
 
 static list_head_t task_list;
@@ -90,8 +91,17 @@ void sched() {
   } else {
     list_add_tail(&current->task_list, &zombie_list);
   }
+
   ENABLE_IRQ();
+
+  if (next->type == TASK_USER) {
+    mmu_switch_to(next->pgd);
+  }
   switch_to(current, next);
+
+  // here is the next task
+  current = get_current();
+
   if (current->type == TASK_USER) {
     signal_handler();
   }
