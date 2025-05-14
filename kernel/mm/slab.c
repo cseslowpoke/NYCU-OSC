@@ -13,6 +13,7 @@
 #include "common/list.h"
 #include "common/printf.h"
 #include "common/types.h"
+#include "common/utils.h"
 #include "drivers/irq.h"
 #include "mm/mm.h"
 
@@ -104,14 +105,14 @@ void *kmem_cache_alloc(uint32_t class) {
   }
   kmem_slab_t *slab =
       list_entry(kmem_caches[class].partial_list.next, kmem_slab_t, list);
-  if (slab->inuse == slab->total - 1) {
+  void *ptr = slab->free_list.next;
+  list_del(slab->free_list.next);
+  slab->inuse++;
+  if (list_empty(&slab->free_list)) {
     list_del(&slab->list);
     list_add(&slab->list, &kmem_caches[class].full_list);
   }
-  slab->inuse++;
 
-  void *ptr = slab->free_list.next;
-  list_del(slab->free_list.next);
 #ifdef MM_DEBUG
   printf("[slab] alloc: 0x%p, chuck size: %d\r\n", ptr,
          kmem_size_classes[class]);
@@ -154,23 +155,38 @@ void kmem_cache_free(void *ptr) {
 }
 
 void *kmalloc(uint32_t size) {
-  DISABLE_IRQ();
+  uint64_t daif = READ_SYSREG(DAIF);
+  if (!(daif & (1 << 7))) {
+    DISABLE_IRQ();
+  }
+  void *ptr;
   // slab allocation
   for (uint32_t i = 0; i < KMEM_SIZE_CLASS; i++) {
     if (size <= kmem_size_classes[i]) {
-      return kmem_cache_alloc(i);
+      ptr = kmem_cache_alloc(i);
+      goto out;
     }
   }
   // handle for bigger memory allocation
-  void *ptr = mm_alloc(size);
+  ptr = mm_alloc(size);
   page_t *page = addr_to_page(ptr);
   page->slab = NULL;
-  ENABLE_IRQ();
+out:
+  if (!(daif & (1 << 7))) {
+    ENABLE_IRQ();
+  }
+  // printf("alloc 0x%x\r\n", ptr);
+
   return ptr;
 }
 
 void kfree(void *ptr) {
-  DISABLE_IRQ();
+  // printf("free 0x%x\r\n", ptr);
+
+  uint64_t daif = READ_SYSREG(DAIF);
+  if (!(daif & (1 << 7))) {
+    DISABLE_IRQ();
+  }
   page_t *page = addr_to_page(ptr);
   if (page->slab == NULL) {
     // handle for bigger memory free
@@ -179,5 +195,7 @@ void kfree(void *ptr) {
     // slab free
     kmem_cache_free(ptr);
   }
-  DISABLE_IRQ();
+  if (!(daif & (1 << 7))) {
+    ENABLE_IRQ();
+  }
 }

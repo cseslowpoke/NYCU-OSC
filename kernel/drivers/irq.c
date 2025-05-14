@@ -150,9 +150,9 @@ void irq_task_exec() {
     if (task == NULL) { // when no task in the queue
       break;
     }
-    ENABLE_IRQ();
+    // ENABLE_IRQ();
     task->handler();
-    DISABLE_IRQ();
+    // DISABLE_IRQ();
     list_add_tail(&task->list, &irq_task_free_list);
   }
   current->irq_priority = irq_pre_priority;

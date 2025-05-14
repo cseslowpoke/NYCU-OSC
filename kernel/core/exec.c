@@ -4,6 +4,7 @@
 #include "common/utils.h"
 #include "core/sched.h"
 #include "core/task.h"
+#include "drivers/irq.h"
 #include "fs/file.h"
 #include "mm/mmu.h"
 #include "mm/slab.h"
@@ -34,6 +35,7 @@ void user_exec(void *prog, uint32_t prog_len) {
 }
 
 int32_t do_exec(const char *filename, char *const argv[]) {
+  DISABLE_IRQ();
   void *user_prog;
   int32_t prog_len = file_find(filename, (char **)&user_prog);
   if (prog_len == -1) {

@@ -126,8 +126,8 @@ void sched_kill_zombie() {
 
 void sched_idle() {
   while (1) {
+    DISABLE_IRQ();
     sched();
-    ENABLE_IRQ();
     sched_kill_zombie();
   }
 }

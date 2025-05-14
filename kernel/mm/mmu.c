@@ -1,9 +1,11 @@
 #include "mm/mmu.h"
 #include "common/types.h"
 #include "common/utils.h"
+#include "drivers/irq.h"
 #include "mm/mm.h"
 
 void mmu_init_kernel() {
+  DISABLE_IRQ();
   uint64_t *page_table_l2_0 = kmalloc(PAGE_SIZE);
 
   // first entry of pmd
@@ -29,6 +31,7 @@ void mmu_init_kernel() {
   }
   KERNEL_IDENTITY_L1[0] = virt_to_phy(page_table_l2_0) | PD_TABLE;
   KERNEL_IDENTITY_L1[1] = virt_to_phy(page_table_l2_1) | PD_TABLE;
+  ENABLE_IRQ();
 }
 
 static int level_shift[4] = {39, 30, 21, 12};

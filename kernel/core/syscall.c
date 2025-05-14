@@ -50,9 +50,11 @@ uint32_t sys_uart_read(char buf[], uint32_t size) {
 }
 
 uint32_t sys_uart_write(const char buf[], uint32_t size) {
+  ENABLE_IRQ();
   for (int i = 0; i < size; i++) {
     uart_send(buf[i]);
   }
+  DISABLE_IRQ();
   return size;
 }
 
