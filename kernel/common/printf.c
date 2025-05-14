@@ -71,3 +71,12 @@ void printf(const char *fmt, ...) {
   va_end(args);
   uart_send_string(buf);
 }
+
+void debug_printf(const char *fmt, ...) {
+  char buf[512];
+  va_list args;
+  va_start(args, fmt);
+  vsprintf(buf, fmt, args);
+  va_end(args);
+  debug_uart_send_string(buf);
+}

@@ -37,4 +37,7 @@ void uart_irq_handler();
 
 void uart_irq_task();
 
+// debug
+void debug_uart_send_string(const char *str);
+
 #endif // __UART_H

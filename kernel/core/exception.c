@@ -10,11 +10,13 @@ void print_exception_imformation(trapframe_t *tf) {
   // task_struct_t *current = get_current();
   // printf("Exception in task pid %d\r\n", current->pid);
   uint64_t reg = READ_SYSREG(ELR_EL1);
-  printf("ELR_EL1: %x\r\n", reg);
+  debug_printf("ELR_EL1: %x\r\n", reg);
   reg = READ_SYSREG(SPSR_EL1);
-  printf("SPSR_EL1: %x\r\n", reg);
+  debug_printf("SPSR_EL1: %x\r\n", reg);
   reg = READ_SYSREG(ESR_EL1);
-  printf("ESR_EL1: %x\r\n\r\n", reg);
+  debug_printf("ESR_EL1: %x\r\n", reg);
+  reg = READ_SYSREG(FAR_EL1);
+  debug_printf("FAR_EL1: %x\r\n", reg);
 }
 
 void default_exception_handler() { print_exception_imformation(NULL); }
@@ -29,7 +31,8 @@ void _el1_lower_el_aarch64_sync_handler(trapframe_t *tf) {
   switch (esr_el1) {
   case 0x56000000: {
     if (syscall_handler(tf) == -1) {
-      printf("Unknown syscall: %d\r\n", tf->gpr[8]);
+      debug_printf("Unknown syscall: %d\r\n", tf->gpr[8]);
+      print_exception_imformation(tf);
     }
     break;
   }
