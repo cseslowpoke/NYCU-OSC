@@ -10,7 +10,7 @@
 
 #define SYSCALL_MAX 10
 
-#define SYSCALL_DEF(num, name, ret_type, args) ret_type sys_##name args;
+#define SYSCALL_DEF(num, name) void sys_##name(trapframe_t *tf);
 
 #include "core/syscall_table.h"
 
