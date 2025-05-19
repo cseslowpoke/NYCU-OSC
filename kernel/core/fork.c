@@ -2,10 +2,11 @@
 #include "common/types.h"
 #include "core/exec.h"
 #include "core/sched.h"
+#include "core/syscall.h"
 #include "core/task.h"
+#include "mm/mm.h"
 #include "mm/mmu.h"
 #include "mm/slab.h"
-#include "core/syscall.h"
 
 struct signal_info_t;
 
@@ -20,21 +21,11 @@ int32_t do_fork() {
     return -1;
   }
 
-  child->prog = kmalloc(current->prog_size);
-  if (!child->prog) {
-    // TODO: destory task by function
-    kfree(child->stack);
-    kfree(child->user_stack);
-    kfree(child->prog);
-    kfree(child);
-    return -1;
-  }
-
   child->prog_size = current->prog_size;
-  memcpy(child->prog, current->prog, current->prog_size);
+  child->prog = current->prog;
 
   // copy current stack to child
-  memcpy(child->user_stack, current->user_stack, USER_STACK_SIZE);
+  // memcpy(child->user_stack, current->user_stack, USER_STACK_SIZE);
 
   child->state = TASK_SLEEPING;
   child->trapframe = child->stack + KERNEL_STACK_SIZE -
@@ -44,16 +35,23 @@ int32_t do_fork() {
   child->trapframe->gpr[0] = 0;
 
   child->pgd = mmu_create_pg();
-  mmu_map(child->pgd, USER_SPACE_BEGIN, (uint64_t)virt_to_phy(child->prog),
-          current->prog_size,  MAIR_NORMAL | PD_ACCESS | AP_RW_EL0);
-  mmu_map(child->pgd, USER_STACK_BEGIN, (uint64_t)virt_to_phy(child->user_stack),
-          USER_STACK_SIZE, MAIR_NORMAL | PD_ACCESS | AP_RW_EL0);
+  increase_ref_count(current->pgd, 0);
+  memcpy(child->pgd, current->pgd, PAGE_SIZE);
 
-  mmu_map(child->pgd, PERIPHERAL_BEGIN, PERIPHERAL_BEGIN,
-          PERIPHERAL_END - PERIPHERAL_BEGIN,
-          MAIR_DEVICE | AP_RW_EL0 | PD_ACCESS);
+  INIT_LIST_HEAD(&child->vm_area_list);
+  list_head_t *vma_pos;
+  list_for_each(vma_pos, &current->vm_area_list) {
+    vm_area_t *cur_vma = list_entry(vma_pos, vm_area_t, list);
+    vm_area_t *new_vma = kmalloc(sizeof(vm_area_t));
+    memcpy(new_vma, cur_vma, sizeof(vm_area_t));
+    INIT_LIST_HEAD(&new_vma->list);
+    vma_insert(child, new_vma);
+    if (new_vma->start != 0x3c000000 && new_vma->end != 0x3f000000 &&
+        ((new_vma->prot & (0b11 << 6)) == AP_RW_EL0)) {
+      vma_mark_readonly(child->pgd, new_vma);
+    }
+  }
 
-  // Set up context for the child
   child->context.sp = (uint64_t)child->trapframe;
   child->context.fp = (uint64_t)child->trapframe;
   child->context.lr = (uint64_t)task_return_el0;
