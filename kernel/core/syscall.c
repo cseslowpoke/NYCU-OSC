@@ -9,6 +9,8 @@
 #include "drivers/irq.h"
 #include "drivers/mailbox.h"
 #include "drivers/uart.h"
+#include "mm/mm.h"
+#include "mm/mmu.h"
 #include "mm/slab.h"
 
 typedef uint64_t (*syscall_handler_t)(trapframe_t *tf);
@@ -104,6 +106,55 @@ void sys_kill(trapframe_t *tf) {
   uint32_t pid = tf->gpr[0];
   uint32_t signum = tf->gpr[1];
   signal_send(pid, signum);
+}
+
+#define PROT_NONE 0
+#define PROT_READ 1
+#define PROT_WRITE 2
+#define PROT_EXEC 4
+
+#define MAP_ANONYMOUS 0x20
+#define MAP_POPULATE 0x8000
+
+void sys_mmap(trapframe_t *tf) {
+  uint64_t addr = tf->gpr[0];
+  uint64_t size = tf->gpr[1];
+  uint64_t prot = tf->gpr[2];
+  uint64_t flag = tf->gpr[3];
+  uint64_t fd = tf->gpr[4];
+  uint64_t offset = tf->gpr[5];
+
+  task_struct_t *current = get_current();
+  // TODO: implement
+  addr = vma_find_unmapped_area_near(current, addr, size);
+  vm_area_t *vma = kmalloc(sizeof(vm_area_t));
+  INIT_LIST_HEAD(&vma->list);
+  vma->start = addr;
+  vma->end = round_up(addr + size, PAGE_SIZE);
+  // set prtotection
+  vma->prot = MAIR_NORMAL;
+  if (prot & PROT_WRITE) {
+    vma->prot |= AP_RW_EL0;
+  } else if (prot & PROT_READ) {
+    vma->prot |= AP_RO_EL0;
+  }
+  if (!(prot & PROT_EXEC)) {
+    vma->prot |= PD_UXN;
+  }
+  if (prot != 0) {
+    vma->prot |= PD_ACCESS;
+  }
+
+  // set flag
+  vma->flags = 0;
+  vma_insert(current, vma);
+
+  if (flag & MAP_POPULATE) {
+    void *ptr = kmalloc(size);
+    mmu_map(current->pgd, vma->start, (uint64_t)virt_to_phy(ptr), size,
+            vma->prot);
+  }
+  tf->gpr[0] = vma->start;
 }
 
 void sys_sigreturn(trapframe_t *tf) { signal_return(); }

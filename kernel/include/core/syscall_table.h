@@ -8,6 +8,5 @@ SYSCALL_DEF(6, mbox_call)
 SYSCALL_DEF(7, pkill)
 SYSCALL_DEF(8, signal)
 SYSCALL_DEF(9, kill)
-SYSCALL_DEF(10, sigreturn)
-// SYSCALL_DEF(10, mmap, void *,
-//             (void *, uint32_t, uint32_t, uint32_t, uint32_t, uin32_t)
+SYSCALL_DEF(10, mmap)
+SYSCALL_DEF(11, sigreturn)

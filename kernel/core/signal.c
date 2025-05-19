@@ -30,7 +30,7 @@ void default_signal_handler(task_struct_t *task, int signum) {
 }
 
 __attribute__((naked)) void __sigreturn_trampoline() {
-  asm volatile("mov x8, #10\n\t" // syscall number for sigreturn
+  asm volatile("mov x8, #11\n\t" // syscall number for sigreturn
                "svc #0\n\t"      // syscall
                "b .\n\t");
 }
