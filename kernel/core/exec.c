@@ -1,4 +1,5 @@
 #include "core/exec.h"
+#include "common/list.h"
 #include "common/printf.h"
 #include "common/types.h"
 #include "common/utils.h"
@@ -6,6 +7,7 @@
 #include "core/task.h"
 #include "drivers/irq.h"
 #include "fs/file.h"
+#include "mm/mm.h"
 #include "mm/mmu.h"
 #include "mm/slab.h"
 
@@ -46,29 +48,10 @@ int32_t do_exec(const char *filename, char *const argv[]) {
   // 1. Get the current task
   task_struct_t *task = get_current();
 
-  // 2. Free old program and user stack
-  if (task->prog) {
-    kfree(task->prog);
-  }
-  if (task->user_stack) {
-    kfree(task->user_stack);
-  }
+  // 2. Free old page table;
 
   // 3. Allocate new program and user stack
-  task->prog = kmalloc(prog_len);
-  if (!task->prog) {
-    printf("Failed to allocate program memory\n");
-    return -1;
-  }
-  task->prog_size = prog_len;
-  memcpy(task->prog, user_prog, prog_len);
-
-  task->user_stack = kmalloc(USER_STACK_SIZE);
-  if (!task->user_stack) {
-    printf("Failed to allocate user stack\n");
-    kfree(task->prog);
-    return -1;
-  }
+  task->prog = user_prog;
 
   // 4. Reset the task type
   task->type = TASK_USER;
@@ -89,16 +72,34 @@ int32_t do_exec(const char *filename, char *const argv[]) {
 
   // 6. setup page table
   task->pgd = mmu_create_pg();
-  mmu_map(task->pgd, USER_SPACE_BEGIN, (uint64_t)virt_to_phy(task->prog),
-          prog_len, MAIR_NORMAL | AP_RW_EL0 | PD_ACCESS);
-  mmu_map(task->pgd, USER_STACK_BEGIN, (uint64_t)virt_to_phy(task->user_stack),
-          USER_STACK_END - USER_STACK_BEGIN,
-          MAIR_NORMAL | AP_RW_EL0 | PD_ACCESS);
+  INIT_LIST_HEAD(&task->vm_area_list);
+
+  vm_area_t *prog_vma = kmalloc(sizeof(vm_area_t));
+  prog_vma->start = USER_SPACE_BEGIN;
+  prog_vma->end = round_up(USER_SPACE_BEGIN + prog_len, PAGE_SIZE);
+  prog_vma->prot = MAIR_NORMAL | AP_RO_EL0 | PD_ACCESS;
+  prog_vma->file = user_prog;
+  INIT_LIST_HEAD(&prog_vma->list);
+  vma_insert(task, prog_vma);
+
+  vm_area_t *stack_vma = kmalloc(sizeof(vm_area_t));
+  stack_vma->start = USER_STACK_BEGIN;
+  stack_vma->end = USER_STACK_END;
+  stack_vma->prot = MAIR_NORMAL | AP_RW_EL0 | PD_ACCESS;
+  stack_vma->file = NULL;
+  INIT_LIST_HEAD(&stack_vma->list);
+  vma_insert(task, stack_vma);
 
   // map peripheral memory
+  vm_area_t *peripheral_vma = kmalloc(sizeof(vm_area_t));
+  peripheral_vma->start = PERIPHERAL_BEGIN;
+  peripheral_vma->end = PERIPHERAL_END;
+  peripheral_vma->prot = MAIR_DEVICE | AP_RW_EL0 | PD_ACCESS;
+  peripheral_vma->file = (void *)phy_to_virt(PERIPHERAL_BEGIN);
+  INIT_LIST_HEAD(&peripheral_vma->list);
   mmu_map(task->pgd, PERIPHERAL_BEGIN, PERIPHERAL_BEGIN,
-          PERIPHERAL_END - PERIPHERAL_BEGIN,
-          MAIR_DEVICE | AP_RW_EL0 | PD_ACCESS);
+          PERIPHERAL_END - PERIPHERAL_BEGIN, peripheral_vma->prot);
+  vma_insert(task, peripheral_vma);
 
   mmu_switch_to(task->pgd);
 
