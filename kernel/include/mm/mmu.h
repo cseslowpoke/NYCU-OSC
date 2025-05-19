@@ -1,9 +1,12 @@
 #ifndef __MMU_H
 #define __MMU_H
 
+#include "common/list.h"
 #include "common/types.h"
+#include "core/task.h"
 
 #define LEVEL 4
+#define PAGE_SIZE 0x1000
 
 // Entry type
 #define PD_TABLE 0b11
@@ -48,5 +51,35 @@ int mmu_map(uint64_t *pg_t, uint64_t va, uint64_t pa, uint64_t size,
 uint64_t *mmu_create_pg();
 
 void mmu_switch_to(uint64_t *pgd);
+
+typedef struct vm_area {
+  // Basic VMA
+  uint64_t start;
+  uint64_t end;
+  uint64_t prot;
+  uint64_t flags;
+
+  // File Extension
+  void *file;
+  uint64_t offset;
+
+  // List
+  list_head_t list;
+} vm_area_t;
+
+void vma_insert(task_struct_t *task, vm_area_t *vma);
+
+vm_area_t *vma_find(task_struct_t *task, uint64_t addr);
+
+int64_t vma_find_unmapped_area_near(task_struct_t *task, uint64_t addr,
+                                    uint64_t size);
+
+void vma_mark_readonly(uint64_t *pgd, vm_area_t *area);
+
+void do_page_fault(uint64_t fault_addr, task_struct_t *task);
+
+void do_permission_fault(uint64_t fault_addr, task_struct_t *task);
+
+void increase_ref_count(uint64_t *pg_t, int level);
 
 #endif

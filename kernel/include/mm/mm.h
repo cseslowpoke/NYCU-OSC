@@ -22,6 +22,9 @@ typedef struct page {
   uint8_t used;          // Used flag
 
   kmem_slab_t *slab; // Pointer to the slab of this page
+
+  // ref count
+  uint32_t ref_count; // Reference count for the page
 } page_t;
 
 extern page_t *page_meta;

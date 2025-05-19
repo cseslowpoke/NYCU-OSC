@@ -60,9 +60,9 @@ typedef struct task_struct {
   signal_info_t signal;
 
   // virtual memory support
-  uint64_t *pgd; // Page Global Directory
-  
-  // test
+  uint64_t *pgd;            // Page Global Directory
+  list_head_t vm_area_list; // List of virtual memory areas
+
 } task_struct_t;
 
 task_struct_t *task_create_kernel(void (*fn)(void));
