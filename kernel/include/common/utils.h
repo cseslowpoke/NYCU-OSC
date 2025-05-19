@@ -79,4 +79,8 @@ void *memcpy(void *dest, const void *src, uint32_t size);
 
 void *memset(void *dest, int c, uint32_t size);
 
+uint64_t round_up(uint64_t num, uint64_t align);
+
+uint64_t round_down(uint64_t num, uint64_t align);
+
 #endif // __UTILS_H

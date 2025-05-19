@@ -96,3 +96,9 @@ void *memset(void *dest, int c, uint32_t size) {
   }
   return dest;
 }
+
+uint64_t round_up(uint64_t num, uint64_t align) {
+  return (num + align - 1) & ~(align - 1);
+}
+
+uint64_t round_down(uint64_t num, uint64_t align) { return num & ~(align - 1); }
