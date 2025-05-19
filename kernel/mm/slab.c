@@ -175,14 +175,10 @@ out:
   if (!(daif & (1 << 7))) {
     ENABLE_IRQ();
   }
-  // printf("alloc 0x%x\r\n", ptr);
-
   return ptr;
 }
 
 void kfree(void *ptr) {
-  // printf("free 0x%x\r\n", ptr);
-
   uint64_t daif = READ_SYSREG(DAIF);
   if (!(daif & (1 << 7))) {
     DISABLE_IRQ();
