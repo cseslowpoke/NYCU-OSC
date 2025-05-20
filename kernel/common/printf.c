@@ -78,5 +78,5 @@ void debug_printf(const char *fmt, ...) {
   va_start(args, fmt);
   vsprintf(buf, fmt, args);
   va_end(args);
-  debug_uart_send_string(buf);
+  uart_send_string(buf);
 }

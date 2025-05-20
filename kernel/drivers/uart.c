@@ -31,29 +31,23 @@ void uart_init() {
 
   *AUX_MU_CNTL = 3;
 
-  irq_enable(AUX_IRQ_NUM);
+  // irq_enable(AUX_IRQ_NUM);
   irq_register(AUX_IRQ_NUM, uart_irq_handler);
 }
 
-void debug_uart_send(char c) {
+void uart_send(char c) {
   while (!(*AUX_MU_LSR & 0x20))
     ;
   *AUX_MU_IO = c;
 }
 
-void debug_uart_send_string(const char *str) {
-  while (*str) {
-    debug_uart_send(*str++);
-  }
-}
-
-char debug_uart_recv() {
+char uart_recv() {
   while (!(*AUX_MU_LSR & 0x1))
     ;
   return (uint8_t)*AUX_MU_IO;
 }
 
-void uart_send(char c) {
+void debug_uart_send(char c) {
   // while ((uart_tx_head + 1) % UART_BUFFER_SIZE == uart_tx_tail)
   //   ;
   uart_tx_buffer[uart_tx_head++] = c;
@@ -61,12 +55,17 @@ void uart_send(char c) {
   *AUX_MU_IER |= 0x2;
 }
 
-char uart_recv() {
+char debug_uart_recv() {
   while (uart_rx_head == uart_rx_tail)
     ;
   return uart_rx_buffer[uart_rx_tail++];
 }
 
+void debug_uart_send_string(const char *str) {
+  while (*str) {
+    debug_uart_send(*str++);
+  }
+}
 void uart_send_string(const char *str) {
   while (*str) {
     uart_send(*str++);
