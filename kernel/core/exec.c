@@ -79,6 +79,7 @@ int32_t do_exec(const char *filename, char *const argv[]) {
   prog_vma->end = round_up(USER_SPACE_BEGIN + prog_len, PAGE_SIZE);
   prog_vma->prot = MAIR_NORMAL | AP_RO_EL0 | PD_ACCESS;
   prog_vma->file = user_prog;
+  prog_vma->offset = 0;
   INIT_LIST_HEAD(&prog_vma->list);
   vma_insert(task, prog_vma);
 

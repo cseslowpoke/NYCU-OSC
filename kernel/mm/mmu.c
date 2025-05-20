@@ -183,15 +183,18 @@ void do_page_fault(uint64_t fault_addr, task_struct_t *task) {
   DISABLE_IRQ();
   vm_area_t *vma = vma_find(task, fault_addr);
   if (vma == NULL) {
-    debug_printf("[Segmentation fault]: Kill Process, FAR: 0x%x\n", fault_addr);
+    debug_printf("[Segmentation fault]: Kill Process, FAR: 0x%x\r\n",
+                 fault_addr);
     while (1) {
       __asm__ volatile("wfi");
     }
   } else {
     fault_addr = round_down(fault_addr, PAGE_SIZE);
     uint64_t offset = fault_addr - vma->start;
-    printf("[Translation fault]: 0x%x\n", fault_addr);
+    printf("[Translation fault]: 0x%x\r\n", fault_addr);
     uint64_t *pa = kmalloc(0x1000);
+    memset(pa, 0, PAGE_SIZE);
+
     if (vma->file != NULL) {
       memcpy(pa, vma->file + vma->offset + offset, PAGE_SIZE);
     }
@@ -220,7 +223,8 @@ void do_permission_fault(uint64_t fault_addr, task_struct_t *task) {
       new_entry[0] = virt_to_phy(new_pa) | vma->prot | PD_PAGE_ENTRY;
       old_entry[0] = virt_to_phy(old_pa) | vma->prot | PD_PAGE_ENTRY;
       __asm__ volatile("dsb ish\n\t"
-                       "tlbi vae1, %0\n\t"
+                       // "tlbi vae1, %0\n\t"
+                       "tlbi vmalle1is\n\t"
                        "dsb ish\n\t"
                        "isb\n\t"
                        :
