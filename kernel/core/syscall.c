@@ -157,4 +157,156 @@ void sys_mmap(trapframe_t *tf) {
   tf->gpr[0] = vma->start;
 }
 
+// int open(const char *pathname, int flags);
+void sys_open(trapframe_t *tf) {
+  const char *pathname = (const char*)tf->gpr[0];
+  int flags = tf->gpr[1];
+  
+  printf("open: %s\r\n", pathname);
+
+  task_struct_t *task = get_current(); 
+  int i;
+  for (i = 0; i < 16; i++) {
+    if (task->file_table[i] == NULL) {
+      break;
+    }
+  }
+  if (i == 16) {
+    printf("No available file descriptor\r\n");
+    return;
+  }
+  vfs_open(pathname, flags, &task->file_table[i]);
+  printf("File %s opened with fd %d\r\n", pathname, i);
+  tf->gpr[0] = i; // Return the file descriptor
+  if (task->file_table[i] == NULL) {
+    printf("Failed to open file %s\r\n", pathname);
+    tf->gpr[0] = -1; // Indicate failure
+    return;
+  }
+}
+
+// int close(int fd);
+void sys_close(trapframe_t *tf) {
+  int fd = tf->gpr[0];
+  printf("close %d\r\n", fd);
+  
+  task_struct_t *task = get_current();
+  if (fd < 0 || fd >= 16) {
+    printf("Invalid file descriptor %d\r\n", fd);
+    return;
+  }
+  struct file *file = task->file_table[fd];
+  if (file == NULL) {
+    printf("File descriptor %d is not open\r\n", fd);
+    return;
+  }
+  // Call the close operation of the file
+  vfs_close(file);
+  // Clear the file descriptor
+  task->file_table[fd] = NULL;
+  printf("File descriptor %d closed\r\n", fd);
+}
+
+// long write(int fd, const void *buf, unsigned long count);
+void sys_write(trapframe_t *tf) {
+  int fd = tf->gpr[0];
+  const void* buf = (void*) tf->gpr[1];
+  uint64_t count = tf->gpr[2];
+
+  printf("write: %d %p\r\n", fd, buf);
+  task_struct_t *task = get_current();
+  if (fd < 0 || fd >= 16) {
+    printf("Invalid file descriptor %d\r\n", fd);
+    return;
+  }
+  struct file *file = task->file_table[fd];
+  if (file == NULL) {
+    printf("File descriptor %d is not open\r\n", fd);
+    return;
+  }
+  // Call the write operation of the file
+  int ret = vfs_write(file, buf, count);
+  if (ret < 0) {
+    printf("Failed to write to file descriptor %d\r\n", fd);
+    return;
+  }
+  printf("Wrote %d bytes to file descriptor %d\r\n", ret, fd);
+  tf->gpr[0] = ret; // Return the number of bytes written
+
+}
+
+// long read(int fd, void *buf, unsigned long count);
+void sys_read(trapframe_t *tf) {
+  int fd = tf->gpr[0];
+  void* buf = (void*) tf->gpr[1];
+  uint64_t count = tf->gpr[2];
+
+  printf("read: %d\r\n",fd);
+  task_struct_t *task = get_current();
+  if (fd < 0 || fd >= 16) {
+    printf("Invalid file descriptor %d\r\n", fd);
+    return;
+  }
+  struct file *file = task->file_table[fd];
+  if (file == NULL) {
+    printf("File descriptor %d is not open\r\n", fd);
+    return;
+  }
+  // Call the read operation of the file
+  int ret = vfs_read(file, buf, count);
+  if (ret < 0) {
+    printf("Failed to read from file descriptor %d\r\n", fd);
+    return;
+  }
+  printf("Read %d bytes from file descriptor %d\r\n", ret, fd);
+  tf->gpr[0] = ret; // Return the number of bytes read
+}
+
+// int mkdir(const char *pathname, unsigned mode);
+void sys_mkdir(trapframe_t *tf) {
+  const char *pathname = (const char*) tf->gpr[0];
+  uint32_t mode = tf->gpr[1];
+  
+  printf("mkdir: %s\r\n",pathname);
+  
+  task_struct_t *task = get_current();
+  int i;
+  for (i = 0; i < 16; i++) {
+    if (task->file_table[i] == NULL) {
+      break;
+    }
+  }
+  if (i == 16) {
+    printf("No available file descriptor\r\n");
+    return;
+  }
+  vfs_mkdir(pathname);
+  printf("Directory %s created with fd %d\r\n", pathname, i);
+  tf->gpr[0] = i; // Return the file descriptor
+  if (task->file_table[i] == NULL) {
+    printf("Failed to create directory %s\r\n", pathname);
+    tf->gpr[0] = -1; // Indicate failure
+    return;
+  }
+}
+
+// int mount(const char *src, const char *target, const char *filesystem, unsigned long flags, const void *data);
+void sys_mount(trapframe_t *tf) {
+  const char *src = (const char*) tf->gpr[0];
+  const char *target = (const char*) tf->gpr[1];
+  const char *fs = (const char*) tf->gpr[2];
+  uint64_t flags = tf->gpr[3];
+  const void* data = (const void*) tf->gpr[4];
+  printf("mount: %s %s\r\n", src, target);
+  vfs_mount(src, target, fs, flags, data);
+}
+
+// int chdir(const char *path);
+void sys_chdir(trapframe_t *tf) {
+  const char *path = (const char*) tf->gpr[0];
+
+  printf("chdir: %s\r\n", path);
+  
+}
+ 
 void sys_sigreturn(trapframe_t *tf) { signal_return(); }

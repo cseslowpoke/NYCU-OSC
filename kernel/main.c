@@ -8,6 +8,7 @@
 #include "drivers/uart.h"
 #include "fs/cpio.h"
 #include "fs/fdt.h"
+#include "fs/vfs.h"
 #include "mm/mm.h"
 #include "mm/mmu.h"
 #include "mm/simple_alloc.h"
@@ -36,6 +37,7 @@ int main(void *dtb_addr) {
   kmem_cache_init();
   mmu_init_kernel();
   timer_init();
+  vfs_init();
   sched_init();
   task_test();
   return 0;

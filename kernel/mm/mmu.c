@@ -47,8 +47,11 @@ uint64_t *mmu_walk(uint64_t *pg_t, uint64_t va, uint64_t alloc) {
       }
       uint64_t *new_pt = kmalloc(PAGE_SIZE);
       memset(new_pt, 0, PAGE_SIZE);
+      page_t *parent_page = addr_to_page(phy_to_virt(pg_t & ~0xfff));
+      // printf("parent_page: %p %d\n", parent_page, parent_page->ref_count);
       page_t *page = addr_to_page(new_pt);
-      page->ref_count = 1;
+      page->ref_count = parent_page->ref_count;
+      // page->ref_count = 1;
       pg_t[idx] = virt_to_phy(new_pt) | PD_TABLE;
     }
     pg_t = (uint64_t *)phy_to_virt(pg_t[idx] & ~0xfff);

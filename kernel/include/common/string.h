@@ -40,4 +40,17 @@ unsigned int strlen(const char *s);
  */
 char *strcpy(char *dest, const char *src);
 
+/*
+ * strdup - duplicate a string.
+ * @param s - string to duplicate.
+ */
+char *strdup(const char *s);
+
+/*
+ * strrchr - find the last occurrence of a character in a string.
+ * @param string - string to search.
+ * @param c - character to find.
+ */
+char *strrchr(const char *string, int c);
+
 #endif

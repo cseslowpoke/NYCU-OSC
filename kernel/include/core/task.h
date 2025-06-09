@@ -3,6 +3,7 @@
 
 #include "common/list.h"
 #include "core/signal.h"
+#include "fs/vfs.h"
 
 #define KERNEL_STACK_SIZE 4096
 #define USER_STACK_SIZE 16384
@@ -63,6 +64,8 @@ typedef struct task_struct {
   uint64_t *pgd;            // Page Global Directory
   list_head_t vm_area_list; // List of virtual memory areas
 
+  // vfs support
+  struct file *file_table[16]; // File descriptors
 } task_struct_t;
 
 task_struct_t *task_create_kernel(void (*fn)(void));

@@ -15,7 +15,7 @@ void file_register(char *filename, char *content, int size) {
 }
 
 int file_find(const char *filename, char **buf) {
-  for (int i = 0; i < file_entry_count; i++) {
+  for (uint32_t i = 0; i < file_entry_count; i++) {
     if (strcmp(file_table[i].name, filename) == 0) {
       *buf = file_table[i].content;
       return file_table[i].size;

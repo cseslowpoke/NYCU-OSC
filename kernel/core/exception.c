@@ -5,19 +5,67 @@
 #include "core/syscall.h"
 #include "core/task.h"
 #include "drivers/irq.h"
+#include "drivers/uart.h"
 #include "mm/mmu.h"
 
 void print_exception_imformation(trapframe_t *tf) {
+  DISABLE_IRQ();
   // task_struct_t *current = get_current();
   // printf("Exception in task pid %d\r\n", current->pid);
   uint64_t reg = READ_SYSREG(ELR_EL1);
   debug_printf("ELR_EL1: 0x%x\r\n", reg);
+  while (reg != 0) {
+    char s;
+    if (reg % 16 < 10) {
+      s = reg % 16 + '0';
+    } else {
+      s = reg % 16 - 10 + 'a';
+    }
+    reg = reg / 16;
+    debug_printf("%c", s);
+  }
+  debug_printf("\r\n");
   reg = READ_SYSREG(SPSR_EL1);
   debug_printf("SPSR_EL1: 0x%x\r\n", reg);
+  while (reg != 0) {
+    char s;
+    if (reg % 16 < 10) {
+      s = reg % 16 + '0';
+    } else {
+      s = reg % 16 - 10 + 'a';
+    }
+    reg = reg / 16;
+    debug_printf("%c", s);
+  }
+  debug_printf("\r\n");
   reg = READ_SYSREG(ESR_EL1);
   debug_printf("ESR_EL1: 0x%x\r\n", reg);
+  while (reg != 0) {
+    char s;
+    if (reg % 16 < 10) {
+      s = reg % 16 + '0';
+    } else {
+      s = reg % 16 - 10 + 'a';
+    }
+    reg = reg / 16;
+    debug_printf("%c", s);
+  }
+  debug_printf("\r\n");
   reg = READ_SYSREG(FAR_EL1);
   debug_printf("FAR_EL1: 0x%x\r\n", reg);
+  while (reg != 0) {
+    char s;
+    if (reg % 16 < 10) {
+      s = reg % 16 + '0';
+    } else {
+      s = reg % 16 - 10 + 'a';
+    }
+    reg = reg / 16;
+    debug_printf("%c", s);
+  }
+  debug_printf("\r\n");
+  while (1)
+    ;
 }
 
 void default_exception_handler() { print_exception_imformation(NULL); }

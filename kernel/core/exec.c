@@ -116,6 +116,7 @@ int32_t do_exec(const char *filename, char *const argv[]) {
   // 8. reset signal
   memset(task->signal.handler, 0, sizeof(task->signal.handler));
 
+  memset(task->file_table, 0, sizeof(task->file_table));
   // 9. return to user space
   static task_struct_t dummy;
   switch_to(&dummy, task);

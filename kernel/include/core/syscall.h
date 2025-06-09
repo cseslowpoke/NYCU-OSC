@@ -8,7 +8,7 @@
 #include "common/types.h"
 #include "core/task.h"
 
-#define SYSCALL_MAX 10
+#define SYSCALL_MAX 18
 
 #define SYSCALL_DEF(num, name) void sys_##name(trapframe_t *tf);
 

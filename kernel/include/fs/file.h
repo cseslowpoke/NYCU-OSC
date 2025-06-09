@@ -1,6 +1,9 @@
 #ifndef __FILE_H
 #define __FILE_H
 
+#include "common/types.h"
+#include "fs/vfs.h"
+
 #define MAX_FILE_NUM 100
 
 /*
