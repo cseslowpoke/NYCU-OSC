@@ -1,5 +1,6 @@
 #include "fs/vfs.h"
 #include "fs/tmpfs.h"
+#include "fs/initramfs.h"
 #include "common/printf.h"
 #include "mm/slab.h"
 #include "common/string.h"
@@ -32,9 +33,12 @@ int register_filesystem(struct filesystem* fs) {
 
 void vfs_init() {
     tmpfs_init();
+    initramfs_init();
     struct mount* mount = (struct mount*)kmalloc(sizeof(struct mount));
     registered_fs[0]->setup_mount(registered_fs[0], mount);
     rootfs = mount; // Set the global rootfs
+    vfs_mkdir("/initramfs", rootfs->root); // Create initramfs mount point
+    vfs_mount("", "/initramfs", "initramfs", 0, NULL, rootfs->root); // Mount initramfs
     // cwd = rootfs->root; // Set current working directory to root
     printf("VFS initialized with rootfs: %s\r\n", rootfs->fs->name);
 }
