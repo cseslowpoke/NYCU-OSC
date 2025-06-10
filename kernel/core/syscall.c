@@ -175,7 +175,7 @@ void sys_open(trapframe_t *tf) {
     printf("No available file descriptor\r\n");
     return;
   }
-  vfs_open(pathname, flags, &task->file_table[i]);
+  vfs_open(pathname, flags, &task->file_table[i], task->cwd);
   printf("File %s opened with fd %d\r\n", pathname, i);
   tf->gpr[0] = i; // Return the file descriptor
   if (task->file_table[i] == NULL) {
@@ -280,7 +280,7 @@ void sys_mkdir(trapframe_t *tf) {
     printf("No available file descriptor\r\n");
     return;
   }
-  vfs_mkdir(pathname);
+  vfs_mkdir(pathname, task->cwd);
   printf("Directory %s created with fd %d\r\n", pathname, i);
   tf->gpr[0] = i; // Return the file descriptor
   if (task->file_table[i] == NULL) {
@@ -298,7 +298,10 @@ void sys_mount(trapframe_t *tf) {
   uint64_t flags = tf->gpr[3];
   const void* data = (const void*) tf->gpr[4];
   printf("mount: %s %s\r\n", src, target);
-  vfs_mount(src, target, fs, flags, data);
+  
+  task_struct_t *task = get_current();
+
+  vfs_mount(src, target, fs, flags, data, task->cwd);
 }
 
 // int chdir(const char *path);
@@ -307,6 +310,14 @@ void sys_chdir(trapframe_t *tf) {
 
   printf("chdir: %s\r\n", path);
   
+  task_struct_t *task = get_current();
+  if (vfs_chdir(path, &task->cwd) != 0) {
+    printf("Failed to change directory to %s\r\n", path);
+    tf->gpr[0] = -1; // Indicate failure
+  } else {
+    printf("Changed directory to %s\r\n", path);
+    tf->gpr[0] = 0; // Indicate success
+  }
 }
  
 void sys_sigreturn(trapframe_t *tf) { signal_return(); }

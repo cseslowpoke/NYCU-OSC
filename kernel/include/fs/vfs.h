@@ -52,9 +52,9 @@ int register_filesystem(struct filesystem* fs);
 
 void vfs_init(void);
 
-int vfs_lookup(const char* pathname, struct vnode** target);
+int vfs_lookup(const char* pathname, struct vnode** target, struct vnode* start_vnode);
 
-int vfs_open(const char* pathname, int flags, struct file** target);
+int vfs_open(const char* pathname, int flags, struct file** target,struct vnode* start_vnode);
 
 int vfs_write(struct file* file, const void* buf, uint32_t len);
 
@@ -62,9 +62,11 @@ int vfs_read(struct file* file, void* buf, uint32_t len);
 
 int vfs_close(struct file* file);
 
-int vfs_mkdir(const char* pathname);
+int vfs_mkdir(const char* pathname, struct vnode* start_vnode);
+
+int vfs_chdir(const char* pathname, struct vnode** start_vnode);
 
 int vfs_mount(const char* src, const char* target, const char* filesystem,
-              unsigned long flags, const void* data);
+              unsigned long flags, const void* data, struct vnode* start_vnode);
 
 #endif // __VFS_H

@@ -22,6 +22,7 @@ static task_struct_t *task_init_common(task_struct_t *task,
   task->context.sp = (uint64_t)(task->stack + KERNEL_STACK_SIZE);
   task->context.fp = (uint64_t)(task->stack + KERNEL_STACK_SIZE);
   task->irq_priority = 0x3f3f3f3f;  // Set the default IRQ priority
+  task->cwd = rootfs->root; // Set the current working directory to root
   INIT_LIST_HEAD(&task->task_list); // Initialize the task list
   return task;
 }

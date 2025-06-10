@@ -66,6 +66,7 @@ typedef struct task_struct {
 
   // vfs support
   struct file *file_table[16]; // File descriptors
+  struct vnode *cwd;          // Current working directory
 } task_struct_t;
 
 task_struct_t *task_create_kernel(void (*fn)(void));

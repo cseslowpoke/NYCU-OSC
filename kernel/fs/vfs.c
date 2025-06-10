@@ -24,7 +24,7 @@ static int mount_count = 0;
 int register_filesystem(struct filesystem* fs) {
     if (num_fs < 10) {
         registered_fs[num_fs++] = fs;
-        printf("Registered filesystem: %s\n", fs->name);
+        printf("Registered filesystem: %s\r\n", fs->name);
         return 0;
     }
     return -1; // No space
@@ -36,22 +36,47 @@ void vfs_init() {
     registered_fs[0]->setup_mount(registered_fs[0], mount);
     rootfs = mount; // Set the global rootfs
     // cwd = rootfs->root; // Set current working directory to root
-    printf("VFS initialized with rootfs: %s\n", rootfs->fs->name);
+    printf("VFS initialized with rootfs: %s\r\n", rootfs->fs->name);
 }
 
-int vfs_lookup(const char* pathname, struct vnode** target) {
-    struct vnode* current_vnode = rootfs->root;
+int vfs_lookup(const char* pathname, struct vnode** target, struct vnode* start_vnode) {
+    struct vnode* current_vnode;
+    if (pathname[0] == '/') {
+        // Absolute path, start from root
+        current_vnode = rootfs->root;
+    } else {
+        // Relative path, start from the provided vnode
+        if (start_vnode == NULL) {
+            return -1; // No starting point provided
+        }
+        current_vnode = start_vnode;
+    }
+    
     char* path = strdup(pathname);
     char* component = strtok(path, '/');
 
     while (component != NULL) {
-        struct vnode* next_vnode = NULL;
-        if (current_vnode->v_ops->lookup(current_vnode, &next_vnode, component) != 0) {
-            kfree(path);
-            return -1;
+        if (strcmp(component, ".") == 0) {
+            
         }
-        current_vnode = check_mount_point(next_vnode);
-        
+        else if (strcmp(component, "..") == 0) {
+            current_vnode = current_vnode->parent;
+            for (int i = 0; i < mount_count; i++) {
+                if (mount_table[i].mount_point == current_vnode) {
+                    current_vnode = current_vnode->parent;
+                    break;
+                }
+            }
+        }
+        else {
+            struct vnode* next_vnode = NULL;
+            if (current_vnode->v_ops->lookup(current_vnode, &next_vnode, component) != 0) {
+                kfree(path);
+                return -1;
+            }
+            current_vnode = next_vnode;
+        }
+        current_vnode = check_mount_point(current_vnode);
         component = strtok(NULL, '/');
     }
 
@@ -61,9 +86,9 @@ int vfs_lookup(const char* pathname, struct vnode** target) {
 }
 
 #define O_CREAT 64
-int vfs_open(const char* pathname, int flags, struct file** target) {
+int vfs_open(const char* pathname, int flags, struct file** target, struct vnode* start_vnode) {
     struct vnode* node;
-    int result = vfs_lookup(pathname, &node);
+    int result = vfs_lookup(pathname, &node, start_vnode);
 
     if (result != 0) { 
         if (flags & O_CREAT) { // if O_CREAT is set, we need to create the file
@@ -76,7 +101,7 @@ int vfs_open(const char* pathname, int flags, struct file** target) {
             }
 
             struct vnode* parent_node;
-            if (vfs_lookup(parent_path, &parent_node) != 0) return -1;
+            if (vfs_lookup(parent_path, &parent_node, start_vnode) != 0) return -1;
 
             // 2. create the vnode
             if (parent_node->v_ops->create(parent_node, &node, componenet) != 0) {
@@ -122,7 +147,7 @@ int vfs_close(struct file* file) {
     return 0;
 }
 
-int vfs_mkdir(const char* pathname) {
+int vfs_mkdir(const char* pathname, struct vnode* start_vnode) {
     // 1. find parent path and component name
     // e.g., "/a/b/c" -> parent_path="/a/b", component_name="c"
     char parent_path[256], componenet[256];
@@ -132,7 +157,7 @@ int vfs_mkdir(const char* pathname) {
 
     // 2. find parent vnode
     struct vnode* parent_node;
-    if (vfs_lookup(parent_path, &parent_node) != 0) {
+    if (vfs_lookup(parent_path, &parent_node, start_vnode) != 0) {
         return -1;
     }
     
@@ -145,8 +170,24 @@ int vfs_mkdir(const char* pathname) {
     return 0;
 }
 
+int vfs_chdir(const char *pathname, struct vnode **start_vnode) {
+    struct vnode *target_vnode;
+    if (vfs_lookup(pathname, &target_vnode, *start_vnode) != 0) {
+        return -1; // Path not found
+    }
+    if (((struct tmpfs_internal*)target_vnode->internal)->type != TMPFS_DIRECTORY) {
+        return -1; // Not a directory
+    }
+    // Check if the target vnode is a mount point
+    target_vnode = check_mount_point(target_vnode);
+    // Set the current working directory to the target vnode
+    *start_vnode = target_vnode;
+    printf("Changed directory to %s\r\n", pathname);
+    return 0; // Success
+}
 
-int vfs_mount(const char *src, const char *target, const char *filesystem, unsigned long flags, const void *data) {
+
+int vfs_mount(const char *src, const char *target, const char *filesystem, unsigned long flags, const void *data, struct vnode* start_vnode ) {
   if (mount_count >= 10) {
     return -1; // No space for more mounts
   }
@@ -156,7 +197,7 @@ int vfs_mount(const char *src, const char *target, const char *filesystem, unsig
     if (strcmp(registered_fs[i]->name, filesystem) == 0) {
       struct vnode *target_vnode;
       // 2. find the target vnode
-      if (vfs_lookup(target, &target_vnode) != 0) {
+      if (vfs_lookup(target, &target_vnode, start_vnode) != 0) {
         return -1; // Target path not found
       }
       struct mount *new_mount = (struct mount *)kmalloc(sizeof(struct mount));
@@ -164,11 +205,12 @@ int vfs_mount(const char *src, const char *target, const char *filesystem, unsig
         return -1; // Memory allocation failed
       }
       registered_fs[i]->setup_mount(registered_fs[i], new_mount);
-    
+      new_mount->root->parent = target_vnode; // Set the parent of the root vnode to the target vnode
+
       mount_table[mount_count].mount_point = target_vnode;
       mount_table[mount_count].mount = new_mount;
       mount_count++;
-      printf("Mounted %s at %s using filesystem %s\n", src, target, filesystem);
+      printf("Mounted %s at %s using filesystem %s\r\n", src, target, filesystem);
       return 0;
     }
   }
